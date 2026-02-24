@@ -1,0 +1,3 @@
+[workspace]
+members = ["core", "discord", "irc", "utils", "app"]
+resolver = "2"

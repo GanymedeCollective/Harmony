@@ -1,0 +1,17 @@
+[package]
+name = "bridge"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bridge-core = { path = "../core" }
+bridge-irc = { path = "../irc" }
+bridge-discord = { path = "../discord" }
+bridge-utils = { path = "../utils" }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+log = "0.4"
+env_logger = "0.11"
+anyhow = "1"
+clap = { version = "4.5.60", features = ["derive"] }

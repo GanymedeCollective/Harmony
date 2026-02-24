@@ -1,0 +1,13 @@
+[irc]
+server = "irc.libera.chat"
+port = 6697
+use_tls = true
+nickname = "bridge-bot"
+channels = ["#your-channel"]
+
+[discord]
+token = "YOUR_DISCORD_BOT_TOKEN"
+
+[[channels]]
+irc = "#your-channel"
+discord = "123456789012345678"
