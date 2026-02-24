@@ -30,9 +30,12 @@ impl MessageSender for DiscordSender {
             author = author.icon_url(avatar_url.to_string());
         }
 
-        let embed = CreateEmbed::new()
+        let mut embed = CreateEmbed::new()
             .author(author)
             .description(&message.content);
+        if let Some(colour) = message.author.colour {
+            embed = embed.color(colour);
+        }
         let msg = CreateMessage::new().embed(embed);
         ChannelId::new(channel_id)
             .send_message(&self.http, msg)
@@ -64,8 +67,10 @@ pub(crate) fn discord_to_core(msg: &SerenityMessage) -> Message {
 
     Message {
         author: User {
+            id: Some(msg.author.id.get().to_string()),
             name: msg.author.name.clone(),
             avatar_url: msg.author.avatar_url().and_then(|u| u.parse().ok()),
+            colour: None,
         },
         channel: Channel {
             id: msg.channel_id.get().to_string(),

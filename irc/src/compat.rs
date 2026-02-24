@@ -27,8 +27,10 @@ pub(crate) fn irc_to_core(msg: &irc::proto::Message) -> Option<Message> {
 
             Some(Message {
                 author: User {
+                    id: None,
                     name: nickname,
                     avatar_url: None,
+                    colour: None,
                 },
                 channel: Channel {
                     id: channel.clone(),
