@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use bridge_core::{Attachment, Channel, Message, MessageSender, User};
+use serenity::builder::{CreateEmbed, CreateEmbedAuthor, CreateMessage};
 use serenity::model::channel::Message as SerenityMessage;
 use serenity::model::id::ChannelId;
 
@@ -23,9 +24,19 @@ impl MessageSender for DiscordSender {
         message: &Message,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let channel_id: u64 = target.id.parse()?;
-        // FIXME: use the card thing for Discord
-        let text = format!("**<{}>** {}", message.author.name, message.content);
-        ChannelId::new(channel_id).say(&self.http, text).await?;
+
+        let mut author = CreateEmbedAuthor::new(&message.author.name);
+        if let Some(avatar_url) = &message.author.avatar_url {
+            author = author.icon_url(avatar_url.to_string());
+        }
+
+        let embed = CreateEmbed::new()
+            .author(author)
+            .description(&message.content);
+        let msg = CreateMessage::new().embed(embed);
+        ChannelId::new(channel_id)
+            .send_message(&self.http, msg)
+            .await?;
         Ok(())
     }
 }

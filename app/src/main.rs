@@ -34,13 +34,14 @@ async fn main() -> Result<()> {
     let args = args::parse();
     logger::init(args.verbose, args.log_path.as_deref());
 
-    let runtime_dir = std::env::var("BRIDGE_RUNTIME_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("runtime"));
+    let config_path = args.config.unwrap_or_else(|| {
+        let runtime_dir = std::env::var("BRIDGE_RUNTIME_DIR")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("runtime"));
+        runtime_dir.join("config.toml")
+    });
 
-    let config_path = runtime_dir.join("config.toml");
-
-    log::info!("runtime directory: {}", runtime_dir.display());
+    log::info!("config: {}", config_path.display());
 
     let cfg = config::load(&config_path)?;
     let channels = cfg.channel_map();
