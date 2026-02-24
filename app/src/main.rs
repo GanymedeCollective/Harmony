@@ -2,24 +2,45 @@ mod args;
 mod config;
 mod logger;
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use anyhow::Result;
 use bridge_core::{Channel, Message, MessageSender};
+use config::UserProfile;
 use tokio::sync::mpsc;
+
+fn enrich_message(msg: &mut Message, profiles: &HashMap<String, UserProfile>) {
+    let key = msg.author.id.as_deref().unwrap_or(&msg.author.name);
+    if let Some(profile) = profiles.get(key) {
+        if let Some(name) = &profile.display_name {
+            msg.author.name = name.clone();
+        }
+        if let Some(url) = &profile.avatar_url {
+            if let Ok(uri) = url.parse() {
+                msg.author.avatar_url = Some(uri);
+            }
+        }
+        if profile.colour.is_some() {
+            msg.author.colour = profile.colour;
+        }
+    }
+}
 
 async fn relay<'a>(
     mut rx: mpsc::Receiver<Message>,
     sender: &impl MessageSender,
-    lookup: impl Fn(&str) -> Option<&'a str>,
+    channel_lookup: impl Fn(&str) -> Option<&'a str>,
+    profiles: &HashMap<String, UserProfile>,
     direction: &str,
 ) -> Result<()> {
-    while let Some(msg) = rx.recv().await {
-        if let Some(target_id) = lookup(&msg.channel.id) {
+    while let Some(mut msg) = rx.recv().await {
+        if let Some(target_id) = channel_lookup(&msg.channel.id) {
             let target = Channel {
                 id: target_id.to_owned(),
                 name: target_id.to_owned(),
             };
+            enrich_message(&mut msg, profiles);
             if let Err(e) = sender.send_message(&target, &msg).await {
                 log::error!("{direction}: failed to relay message: {e}");
             }
@@ -45,8 +66,13 @@ async fn main() -> Result<()> {
 
     let cfg = config::load(&config_path)?;
     let channels = cfg.channel_map();
+    let user_profiles = cfg.user_profiles();
 
-    log::info!("starting bridge with {} channel pair(s)", channels.len());
+    log::info!(
+        "starting bridge with {} channel pair(s) and {} user mapping(s)",
+        channels.len(),
+        cfg.users.len(),
+    );
 
     let irc_config = bridge_irc::IrcConfig {
         nickname: Some(cfg.irc.nickname.clone()),
@@ -69,8 +95,8 @@ async fn main() -> Result<()> {
     log::info!("bridge is running, ctrl+c to stop");
 
     tokio::select! {
-        r = relay(irc_rx, &discord_sender, |id| channels.get_by_left(id).map(|s| s.as_str()), "IRC->Discord") => r?,
-        r = relay(discord_rx, &irc_sender, |id| channels.get_by_right(id).map(|s| s.as_str()), "Discord->IRC") => r?,
+        r = relay(irc_rx, &discord_sender, |id| channels.get_by_left(id).map(|s| s.as_str()), &user_profiles, "IRC->Discord") => r?,
+        r = relay(discord_rx, &irc_sender, |id| channels.get_by_right(id).map(|s| s.as_str()), &user_profiles, "Discord->IRC") => r?,
         _ = tokio::signal::ctrl_c() => {
             log::info!("shutting down...");
         }
