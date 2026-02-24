@@ -17,6 +17,8 @@ pub struct IrcSection {
     pub port: u16,
     #[serde(default = "default_true")]
     pub use_tls: bool,
+    #[serde(default)]
+    pub accept_invalid_certs: bool,
     pub nickname: String,
     #[serde(default)]
     pub channels: Vec<String>,

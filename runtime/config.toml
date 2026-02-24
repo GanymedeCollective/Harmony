@@ -1,13 +1,14 @@
 [irc]
-server = "irc.libera.chat"
-port = 6697
+server = "ip/uri"
+port = 123
 use_tls = true
-nickname = "bridge-bot"
-channels = ["#your-channel"]
+accept_invalid_certs = true
+nickname = "ACU-BRIDGE"
+channels = ["#test-irc-haha"]
 
 [discord]
-token = "YOUR_DISCORD_BOT_TOKEN"
+token = "UwU"
 
 [[channels]]
-irc = "#your-channel"
-discord = "123456789012345678"
+irc = "#test-irc-haha"
+discord = "1475796938766160025"
