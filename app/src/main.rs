@@ -52,6 +52,7 @@ async fn main() -> Result<()> {
         server: Some(cfg.irc.server),
         port: Some(cfg.irc.port),
         use_tls: Some(cfg.irc.use_tls),
+        dangerously_accept_invalid_certs: Some(cfg.irc.accept_invalid_certs),
         channels: cfg.irc.channels,
         ..Default::default()
     };
