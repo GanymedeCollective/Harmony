@@ -1,17 +1,18 @@
 [irc]
-server = "ip/uri"
-port = 123
+server = "82.67.16.187"
+port = 443
 use_tls = true
 accept_invalid_certs = true
 nickname = "ACU-BRIDGE"
 channels = ["#test-irc-haha"]
 
 [discord]
-token = "UwU"
+token = "MTQ3NTc5MzcwNzU0MTIwNTA1NQ.G_Y949.EizACn-u235GBmCnsgMGeOwdu7Q9IJv2yxQ6Eg"
 
 [[channels]]
 irc = "#test-irc-haha"
 discord = "1475796938766160025"
+
 
 [[users]]
 irc = "JaliW"
