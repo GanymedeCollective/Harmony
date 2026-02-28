@@ -4,7 +4,7 @@ port = 443
 use_tls = true
 accept_invalid_certs = true
 nickname = "ACU-BRIDGE"
-channels = ["#test-irc-haha"]
+channels = ["#test-irc-haha", "#articles-or-confs"]
 
 [discord]
 token = "MTQ3NTc5MzcwNzU0MTIwNTA1NQ.G_Y949.EizACn-u235GBmCnsgMGeOwdu7Q9IJv2yxQ6Eg"
@@ -13,24 +13,14 @@ token = "MTQ3NTc5MzcwNzU0MTIwNTA1NQ.G_Y949.EizACn-u235GBmCnsgMGeOwdu7Q9IJv2yxQ6E
 irc = "#test-irc-haha"
 discord = "1475796938766160025"
 
-
-[[users]]
-irc = "JaliW"
-discord = "227751221006434306"
-display_name = "JaliW"
-avatar_url = "https://avatars.githubusercontent.com/u/53870805"
-colour = "#5ccc96"
-
 [[users]]
 irc = "gogo94210"
 discord = "254606390843277312"
 display_name = "gogo"
 avatar_url = "https://media.discordapp.net/attachments/1226863196120547421/1471157738821386334/image.png?ex=699e64a9&is=699d1329&hm=58423c515f925e0cbd9b657f7f87b52498d0735f4e79bf20b969e5cc2a7db988&="
-colour = "#1f8b4c"
 
 [[users]]
 irc = "BEN10DOBRAZILLL"
 discord = "228133651416743937"
 display_name = "Paxim Dayeur"
-avatar_url = "https://beststarnews.github.io/spotlight/anime-femboy.html"
-colour = "#4f73bd"
+avatar_url = "https://i.pinimg.com/originals/45/dc/47/45dc472a9649f6710ef97ee8657110ef.jpg"

@@ -1,15 +1,13 @@
 use std::error::Error;
 
-use async_trait::async_trait;
-
+use crate::BoxFuture;
 use crate::Channel;
 use crate::Message;
 
-#[async_trait]
 pub trait MessageSender: Send + Sync + 'static {
-    async fn send_message(
-        &self,
-        target: &Channel,
-        message: &Message,
-    ) -> Result<(), Box<dyn Error + Send + Sync>>;
+    fn send_message<'a>(
+        &'a self,
+        target: &'a Channel,
+        message: &'a Message,
+    ) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>;
 }

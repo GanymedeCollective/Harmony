@@ -2,16 +2,16 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use bridge_utils::BiMap;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Config {
     pub irc: IrcSection,
     pub discord: DiscordSection,
-    pub channels: Vec<ChannelPair>,
     #[serde(default)]
-    pub users: Vec<UserPair>,
+    pub channels: Vec<ChannelLink>,
+    #[serde(default)]
+    pub users: Vec<UserLink>,
 }
 
 #[derive(Deserialize)]
@@ -27,6 +27,20 @@ pub struct IrcSection {
     pub channels: Vec<String>,
 }
 
+impl IrcSection {
+    pub fn to_irc_config(&self) -> bridge_irc::IrcConfig {
+        bridge_irc::IrcConfig {
+            nickname: Some(self.nickname.clone()),
+            server: Some(self.server.clone()),
+            port: Some(self.port),
+            use_tls: Some(self.use_tls),
+            dangerously_accept_invalid_certs: Some(self.accept_invalid_certs),
+            channels: self.channels.clone(),
+            ..Default::default()
+        }
+    }
+}
+
 fn default_true() -> bool {
     true
 }
@@ -36,63 +50,19 @@ pub struct DiscordSection {
     pub token: String,
 }
 
-#[derive(Deserialize)]
-pub struct ChannelPair {
-    pub irc: String,
-    pub discord: String,
-}
+/// A channel link maps channel identifiers across platforms.
+/// Example: `{ "irc": "#general", "discord": "123456" }`
+pub type ChannelLink = HashMap<String, String>;
 
-#[derive(Deserialize)]
-pub struct UserPair {
-    pub irc: String,
-    pub discord: String,
+/// A user link maps a user's identity across platforms
+#[derive(Deserialize, Clone)]
+pub struct UserLink {
+    #[serde(default)]
     pub display_name: Option<String>,
+    #[serde(default)]
     pub avatar_url: Option<String>,
-    pub colour: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct UserProfile {
-    pub display_name: Option<String>,
-    pub avatar_url: Option<String>,
-    pub colour: Option<u32>,
-}
-
-fn parse_hex_colour(s: &str) -> Option<u32> {
-    let hex = s.strip_prefix('#').unwrap_or(s);
-    u32::from_str_radix(hex, 16).ok()
-}
-
-impl Config {
-    pub fn channel_map(&self) -> BiMap<String, String> {
-        let mut map = BiMap::with_capacity(self.channels.len());
-        for pair in &self.channels {
-            map.insert(pair.irc.clone(), pair.discord.clone());
-        }
-        map
-    }
-
-    pub fn user_map(&self) -> BiMap<String, String> {
-        let mut map = BiMap::with_capacity(self.users.len());
-        for pair in &self.users {
-            map.insert(pair.irc.clone(), pair.discord.clone());
-        }
-        map
-    }
-
-    pub fn user_profiles(&self) -> HashMap<String, UserProfile> {
-        let mut profiles = HashMap::with_capacity(self.users.len() * 2);
-        for pair in &self.users {
-            let profile = UserProfile {
-                display_name: pair.display_name.clone(),
-                avatar_url: pair.avatar_url.clone(),
-                colour: pair.colour.as_deref().and_then(parse_hex_colour),
-            };
-            profiles.insert(pair.irc.clone(), profile.clone());
-            profiles.insert(pair.discord.clone(), profile);
-        }
-        profiles
-    }
+    #[serde(flatten)]
+    pub identities: HashMap<String, String>,
 }
 
 pub fn load(path: &Path) -> Result<Config> {

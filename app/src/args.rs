@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(about = "IRC-Discord bridge")]
@@ -13,8 +13,13 @@ pub struct Args {
 
     #[arg(short, action = clap::ArgAction::Count)]
     pub verbose: u8,
+
+    #[command(subcommand)]
+    pub command: Option<Command>,
 }
 
-pub fn parse() -> Args {
-    Args::parse()
+#[derive(Subcommand)]
+pub enum Command {
+    /// fetch channel/user to write fetched_data.toml
+    Fetch,
 }

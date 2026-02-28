@@ -1,0 +1,543 @@
+[[platforms.discord.channels]]
+id = "1226863196120547421"
+name = "general"
+
+[[platforms.discord.channels]]
+id = "1226952616794263654"
+name = "shitpost"
+
+[[platforms.discord.channels]]
+id = "1230496382901813388"
+name = "image"
+
+[[platforms.discord.channels]]
+id = "1247561020180795512"
+name = "pybd"
+
+[[platforms.discord.channels]]
+id = "1277394199318368296"
+name = "seascow"
+
+[[platforms.discord.channels]]
+id = "1283414822578290738"
+name = "gpu"
+
+[[platforms.discord.channels]]
+id = "1318311671286075543"
+name = "gistre"
+
+[[platforms.discord.channels]]
+id = "1318331415305392168"
+name = "quantum"
+
+[[platforms.discord.channels]]
+id = "1318331555441283143"
+name = "sigl"
+
+[[platforms.discord.channels]]
+id = "1318346119146770504"
+name = "ice"
+
+[[platforms.discord.channels]]
+id = "1318350673070264361"
+name = "srs"
+
+[[platforms.discord.channels]]
+id = "1318351473054191747"
+name = "startup"
+
+[[platforms.discord.channels]]
+id = "1318352773137301615"
+name = "santé"
+
+[[platforms.discord.channels]]
+id = "1318353080638509096"
+name = "gitm"
+
+[[platforms.discord.channels]]
+id = "1319816473430065214"
+name = "mti-les-racistes-sauf-daniel"
+
+[[platforms.discord.channels]]
+id = "1322311145352200333"
+name = "apping"
+
+[[platforms.discord.channels]]
+id = "1324413792867586058"
+name = "droit"
+
+[[platforms.discord.channels]]
+id = "1324413869824675901"
+name = "verif"
+
+[[platforms.discord.channels]]
+id = "1336194091955785750"
+name = "annonces"
+
+[[platforms.discord.channels]]
+id = "1336357504627507315"
+name = "cacademon"
+
+[[platforms.discord.channels]]
+id = "1336358608715251712"
+name = "suggestions"
+
+[[platforms.discord.channels]]
+id = "1336362977636515840"
+name = "gay-ming"
+
+[[platforms.discord.channels]]
+id = "1336367716382281748"
+name = "animal-well"
+
+[[platforms.discord.channels]]
+id = "1337460076805361727"
+name = "news"
+
+[[platforms.discord.channels]]
+id = "1341863601400446996"
+name = "cuisine-yummy-in-my-tummy"
+
+[[platforms.discord.channels]]
+id = "1343532410419023963"
+name = "album-recs"
+
+[[platforms.discord.channels]]
+id = "1343880609520685086"
+name = "the-birth-of-futsal"
+
+[[platforms.discord.channels]]
+id = "1344980466268110892"
+name = "quoi"
+
+[[platforms.discord.channels]]
+id = "1346835536244899910"
+name = "tech"
+
+[[platforms.discord.channels]]
+id = "1347623172232708096"
+name = "le-chat-de-elsa"
+
+[[platforms.discord.channels]]
+id = "1349716488277463166"
+name = "heuuuu-je-de-le-pouler"
+
+[[platforms.discord.channels]]
+id = "1354046961170386944"
+name = "juuules-uwu-chatpeau-chatpeau"
+
+[[platforms.discord.channels]]
+id = "1354418640597946418"
+name = "congalala-appreciation"
+
+[[platforms.discord.channels]]
+id = "1355280346358481174"
+name = "quotes"
+
+[[platforms.discord.channels]]
+id = "1362441108004798625"
+name = "jobs"
+
+[[platforms.discord.channels]]
+id = "1374041541701664798"
+name = "peripherals🚿"
+
+[[platforms.discord.channels]]
+id = "1379758399431901205"
+name = "rapport-stage"
+
+[[platforms.discord.channels]]
+id = "1380254512996155604"
+name = "jazz-chez-futsal"
+
+[[platforms.discord.channels]]
+id = "1382383386479296603"
+name = "conf-nvidia"
+
+[[platforms.discord.channels]]
+id = "1382491533160485007"
+name = "salon-le-plus-fier"
+
+[[platforms.discord.channels]]
+id = "1394433132907855962"
+name = "vacances-acu-2025"
+
+[[platforms.discord.channels]]
+id = "1399309951914086481"
+name = "piece-gateau"
+
+[[platforms.discord.channels]]
+id = "1400078076523843715"
+name = "bar-à-jeux-vendredi"
+
+[[platforms.discord.channels]]
+id = "1427968643421048924"
+name = "bisou-paris"
+
+[[platforms.discord.channels]]
+id = "1432320001628438568"
+name = "trip-pictures"
+
+[[platforms.discord.channels]]
+id = "1450828015142699078"
+name = "articles-or-confs-🤓☝️📖"
+
+[[platforms.discord.channels]]
+id = "1452669035865964544"
+name = "coaching-42sh-2027"
+
+[[platforms.discord.channels]]
+id = "1455190988422123754"
+name = "fosdem"
+
+[[platforms.discord.channels]]
+id = "1460990106029527195"
+name = "horreurs-au-travail"
+
+[[platforms.discord.channels]]
+id = "1464300272229548206"
+name = "actu-et-politique"
+
+[[platforms.discord.channels]]
+id = "1468623081483407546"
+name = "vacances-v3"
+
+[[platforms.discord.channels]]
+id = "1470880977416098069"
+name = "truc-pas-drole-a-faire"
+
+[[platforms.discord.channels]]
+id = "1470884040902049867"
+name = "rer-a-appreciation"
+
+[[platforms.discord.channels]]
+id = "1472015074947236097"
+name = "accueil"
+
+[[platforms.discord.channels]]
+id = "1475561757748494490"
+name = "test-irc-haha"
+
+[[platforms.discord.channels]]
+id = "1475582967584657519"
+name = "infos-irc"
+
+[[platforms.discord.channels]]
+id = "1475796938766160025"
+name = "test-irc-hahaha"
+
+[[platforms.discord.channels]]
+id = "1475816472747184158"
+name = "grrrrr-les-tigres"
+
+[[platforms.discord.users]]
+id = "178918242541109248"
+name = "brydd_"
+avatar_url = "https://cdn.discordapp.com/avatars/178918242541109248/d65bf7c23bfe7c7400cc438da9273eef.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "185014668211912704"
+name = "tetooooooo"
+display_name = "ppitou"
+avatar_url = "https://cdn.discordapp.com/avatars/185014668211912704/728060f35bd2677011a7496bb1a565a6.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "193998547815759873"
+name = "ardenos"
+display_name = "ewan celui avec un f"
+avatar_url = "https://cdn.discordapp.com/avatars/193998547815759873/2522856829c8b5d341f4364133d87471.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "216649948832333824"
+name = "ppitou"
+display_name = "teto"
+avatar_url = "https://cdn.discordapp.com/avatars/216649948832333824/7c8b55efe61b25f3a9f351f2c7aaced4.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "220479090602278912"
+name = "hellscrimson"
+display_name = "Matthias"
+avatar_url = "https://cdn.discordapp.com/avatars/220479090602278912/e9d5ca68b7b086ff21c6a48a44a9556a.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "220619550163468289"
+name = "flyyyyyyyyy"
+avatar_url = "https://cdn.discordapp.com/avatars/220619550163468289/22fb7114cbb02e0c6487bfcdcb984e0b.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "222005603294380033"
+name = "artemisfowl_"
+display_name = "OOKLAT BOB"
+avatar_url = "https://cdn.discordapp.com/avatars/222005603294380033/62192c18c4e13d9a6b29793b2c5de034.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "227136703075319808"
+name = "juloow"
+avatar_url = "https://cdn.discordapp.com/avatars/227136703075319808/dadf6d3478c559555560c50cf867555d.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "227751221006434306"
+name = "aaalibaba"
+display_name = "JaliW"
+avatar_url = "https://cdn.discordapp.com/avatars/227751221006434306/a6e0e60cc6ef6bfe6882761eb275e47e.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "228133651416743937"
+name = "pancook"
+display_name = "BEN10DOBRAZILLL"
+avatar_url = "https://cdn.discordapp.com/avatars/228133651416743937/bc668e999663e824a988e875d203aefb.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "234242303273861130"
+name = "goblivend"
+display_name = "Ivan"
+avatar_url = "https://cdn.discordapp.com/avatars/234242303273861130/4dadd782bd7f5c157d783e0fdee7d2bd.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "234437740958056448"
+name = "sheinxy"
+display_name = "Chaphaël"
+avatar_url = "https://cdn.discordapp.com/avatars/234437740958056448/a_233cae74706dd8673717000d82e79377.gif?size=1024"
+
+[[platforms.discord.users]]
+id = "240840276153729024"
+name = "amorapreta"
+avatar_url = "https://cdn.discordapp.com/avatars/240840276153729024/b1b83b09e562f043b94055b0cfe85650.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "241150698958356480"
+name = "adoomti"
+avatar_url = "https://cdn.discordapp.com/avatars/241150698958356480/52819d5d26f61576e992ac4f61492824.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "241255360839680001"
+name = "ohdearmc"
+display_name = "Quentin"
+avatar_url = "https://cdn.discordapp.com/avatars/241255360839680001/ac19dfa8f6f4f156101dd2f75678784e.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "242667745265582082"
+name = "ravageax"
+display_name = "MISTER BR"
+avatar_url = "https://cdn.discordapp.com/avatars/242667745265582082/a_357b9180da8151b72cb3662d1a659912.gif?size=1024"
+
+[[platforms.discord.users]]
+id = "244077726154096641"
+name = "cyril116"
+display_name = "theo 오빠, 사랑해"
+avatar_url = "https://cdn.discordapp.com/avatars/244077726154096641/79aa32087bdd12e02b5c5baccbd20ff5.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "254606390843277312"
+name = "gogo94210"
+display_name = "pancook"
+avatar_url = "https://cdn.discordapp.com/avatars/254606390843277312/02c327f7658ec69e969a2b1e508e7623.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "256891745764114434"
+name = "dragons0871"
+avatar_url = "https://cdn.discordapp.com/avatars/256891745764114434/692287474cc30bcf85ed53584017ff33.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "260092826640056320"
+name = "therealcoochieman"
+display_name = "ivan"
+avatar_url = "https://cdn.discordapp.com/avatars/260092826640056320/11b2b22596407d44aec51adc61272cf3.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "261157434951860225"
+name = "exako"
+display_name = "Cyril"
+avatar_url = "https://cdn.discordapp.com/avatars/261157434951860225/3098dc154cce8c9c1e99db504e684a3b.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "267027162589036554"
+name = "catrose"
+avatar_url = "https://cdn.discordapp.com/avatars/267027162589036554/ab975dd45482c51262e07a0afb00e401.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "268742380079808512"
+name = "telunya"
+display_name = "Aïshan"
+avatar_url = "https://cdn.discordapp.com/avatars/268742380079808512/4964a6ce079d92ac0b6a6d28519f9e8a.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "270658740456259586"
+name = "maikashan"
+display_name = "PA"
+avatar_url = "https://cdn.discordapp.com/avatars/270658740456259586/533e1ce07041dcdcaba6487cafd85aec.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "272149875939082242"
+name = "apeuh"
+display_name = "napafait lana del rey avec theo"
+avatar_url = "https://cdn.discordapp.com/avatars/272149875939082242/3d6e091e80e7e93ed9c29aa0aa3e14ff.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "280054929576689665"
+name = "mmmmmmmmmmmmmmh"
+display_name = "Prout"
+avatar_url = "https://cdn.discordapp.com/avatars/280054929576689665/4e000a6a215729f3385b0e808590a3c1.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "283207938112225280"
+name = "harsane"
+avatar_url = "https://cdn.discordapp.com/avatars/283207938112225280/c565b6ad33079974722738ddfdc9f5e1.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "287656833328480257"
+name = "vokungahrotlaas"
+display_name = "maxence.michot"
+avatar_url = "https://cdn.discordapp.com/avatars/287656833328480257/3dd3d11bb9c8796e142456129793ae14.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "288720944820912129"
+name = "xutupax"
+display_name = "futsal"
+avatar_url = "https://cdn.discordapp.com/avatars/288720944820912129/3a4fdf97233f0150b8f3913d766acf91.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "302837430732587009"
+name = "dreamfox26"
+avatar_url = "https://cdn.discordapp.com/avatars/302837430732587009/cbad4599cf032f7c49083702ebf59fbb.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "305009931633819650"
+name = "seveny7"
+display_name = "ewan celui avec un v"
+avatar_url = "https://cdn.discordapp.com/avatars/305009931633819650/f9cb018a27418bddfa183f802ae208db.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "314456598594584576"
+name = "nyxhund"
+display_name = "Teho"
+avatar_url = "https://cdn.discordapp.com/avatars/314456598594584576/09220bcce480fe0a3ebef573202635e8.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "316663340921520128"
+name = "thatmatrix"
+avatar_url = "https://cdn.discordapp.com/avatars/316663340921520128/c160a5393db6ea6b743dce6f4d5f940a.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "325628413761290241"
+name = "binaryalien"
+display_name = "ewan celui avec un i"
+avatar_url = "https://cdn.discordapp.com/avatars/325628413761290241/7dfc733b6d68467201071ae6c43c7719.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "327767075970088970"
+name = "matthieuuu"
+avatar_url = "https://cdn.discordapp.com/avatars/327767075970088970/0f7e5a0ad867a7e990957700dfc90684.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "343477668685152258"
+name = "rizou_95"
+display_name = "Reel enjoyer"
+avatar_url = "https://cdn.discordapp.com/avatars/343477668685152258/508759086bda8c926a0040f59b0bb1c8.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "361581725068820490"
+name = "snoop._"
+avatar_url = "https://cdn.discordapp.com/avatars/361581725068820490/5e65b7d589c2ac709bd67c5d7e1cccbb.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "385382657485176834"
+name = "iouki13_"
+avatar_url = "https://cdn.discordapp.com/avatars/385382657485176834/956c43b1d88d33a4cb95b2f48bdf46a2.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "395596786179375114"
+name = "bo6931"
+avatar_url = "https://cdn.discordapp.com/avatars/395596786179375114/d076922dca821414fd0f82b979cd45bc.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "413094290323931146"
+name = ".ghid"
+avatar_url = "https://cdn.discordapp.com/avatars/413094290323931146/9226fdc89f0322bd6d66596362f7d77f.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "444214202526072833"
+name = "hugosg"
+avatar_url = "https://cdn.discordapp.com/avatars/444214202526072833/e588a912691d43f82d36cffdc6705d0c.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "444880836295131138"
+name = "captainfloat"
+display_name = "Vinh"
+avatar_url = "https://cdn.discordapp.com/avatars/444880836295131138/85e420fb74aee95aba05dbc19cf5b2a8.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "538808879606398977"
+name = "fantassin_sf2"
+avatar_url = "https://cdn.discordapp.com/avatars/538808879606398977/9f2dafc9f88beefaad741cb63fd15e0b.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "539913150619713580"
+name = "dorian.penso"
+avatar_url = "https://cdn.discordapp.com/avatars/539913150619713580/c6de88b5af4cc9c49b1dcb63fd15683b.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "550268461083918356"
+name = "maximebuisson"
+avatar_url = "https://cdn.discordapp.com/avatars/550268461083918356/4ea05cf5673d323970c0de3358bc2a63.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "583362151129940042"
+name = "asgaard75010"
+avatar_url = "https://cdn.discordapp.com/avatars/583362151129940042/f7f5ee5d6dbdf29a0d3cab9274c4c310.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "588634509327597570"
+name = "julesg2343"
+avatar_url = "https://cdn.discordapp.com/avatars/588634509327597570/1757ecd8ea589c3a32196a03c28127e3.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "618877469382148129"
+name = "nanadu11"
+avatar_url = "https://cdn.discordapp.com/avatars/618877469382148129/1dd01cc2a3ed7b02ef058dcdf1a19a81.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "625349653595947048"
+name = "sanassi.cisse"
+avatar_url = "https://cdn.discordapp.com/avatars/625349653595947048/828a85514c62fef5a67c07e30c292038.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "647707239158775819"
+name = "antabuse"
+avatar_url = "https://cdn.discordapp.com/avatars/647707239158775819/7b83935411708e4f27561c0b1d01bee1.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "667847431496663100"
+name = "also_clem"
+avatar_url = "https://cdn.discordapp.com/avatars/667847431496663100/20854f11cedbd36cd5fb46b6c13f2ce4.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "687996494707818496"
+name = "pipou._."
+avatar_url = "https://cdn.discordapp.com/avatars/687996494707818496/4917200f55a5155909110d713a5d9b33.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "690212908562513966"
+name = "lea9980"
+avatar_url = "https://cdn.discordapp.com/avatars/690212908562513966/42918da8d2094bb4139b1a702db61777.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "717790663680458805"
+name = "barbora_"
+avatar_url = "https://cdn.discordapp.com/avatars/717790663680458805/8ac6bef1347f0e8f3558028c451b6b04.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "755053436176957441"
+name = "quentin_hdr"
+avatar_url = "https://cdn.discordapp.com/avatars/755053436176957441/37246f5ac4717fddffd4adc5f85a8f42.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "755727429057642516"
+name = "elsa18"
+display_name = "mmmmmmmmmmmmmmh"
+avatar_url = "https://cdn.discordapp.com/avatars/755727429057642516/59b06f62f9ed9a7b9ab27da0d30bc3a3.webp?size=1024"
+
+[[platforms.discord.users]]
+id = "756097414909263934"
+name = "secouss"
+avatar_url = "https://cdn.discordapp.com/avatars/756097414909263934/c1cb1c0eb68ca900a2da173538eb65ba.webp?size=1024"
