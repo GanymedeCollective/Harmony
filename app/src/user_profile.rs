@@ -1,7 +1,5 @@
 #[derive(Debug, Clone)]
-pub struct User {
-    pub id: Option<String>,
-    pub name: String,
+pub struct UserProfile {
     pub display_name: Option<String>,
     pub avatar_url: Option<String>,
 }

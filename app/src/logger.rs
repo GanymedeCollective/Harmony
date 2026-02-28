@@ -3,10 +3,9 @@ use std::path::Path;
 
 fn verbosity_to_level(v: u8) -> log::LevelFilter {
     match v {
-        0 => log::LevelFilter::Error,
-        1 => log::LevelFilter::Warn,
-        2 => log::LevelFilter::Info,
-        _ => log::LevelFilter::Debug,
+        0 => log::LevelFilter::Info,
+        1 => log::LevelFilter::Debug,
+        _ => log::LevelFilter::Trace,
     }
 }
 
