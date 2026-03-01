@@ -1,3 +1,5 @@
+//! Applies `MetaEvent`s to the fetched-data store
+
 use bridge_core::MetaEvent;
 
 use crate::fetched_data::FetchedData;

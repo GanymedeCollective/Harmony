@@ -1,3 +1,5 @@
+//! Deserializes `config.toml` into typed configuration
+
 use std::collections::HashMap;
 use std::path::Path;
 

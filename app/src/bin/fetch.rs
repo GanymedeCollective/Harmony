@@ -1,3 +1,6 @@
+//! Utility binary. Fetches channels and users from all platforms, writes
+//! `fetched_data.toml`.
+
 use std::path::PathBuf;
 
 use anyhow::Result;

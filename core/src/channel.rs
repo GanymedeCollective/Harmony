@@ -1,3 +1,5 @@
+//! A chat channel on a single platform.
+
 #[derive(Debug, Clone)]
 pub struct Channel {
     pub id: String,

@@ -1,3 +1,5 @@
+//! A chat message with metadata
+
 use crate::Attachment;
 use crate::Channel;
 use crate::User;

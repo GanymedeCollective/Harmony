@@ -1,3 +1,5 @@
+//! Lifecycle events (joins, leaves, renames, channel changes).
+
 use crate::{PlatformId, User};
 
 #[derive(Debug, Clone)]

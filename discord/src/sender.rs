@@ -1,3 +1,5 @@
+//! Sends bridged messages via per-channel webhooks.
+
 use std::collections::HashMap;
 use std::sync::Arc;
 

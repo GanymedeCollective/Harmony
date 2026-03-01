@@ -1,3 +1,5 @@
+//! Sends bridged messages as IRC PRIVMSG.
+
 use bridge_core::{BoxFuture, Channel, Message, MessageSender};
 use irc::client as irc_client;
 

@@ -1,3 +1,5 @@
+//! A file attached to a message (not actionnable yet)
+
 use http::Uri;
 
 #[derive(Debug, Clone)]

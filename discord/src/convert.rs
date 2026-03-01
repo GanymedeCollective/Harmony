@@ -1,3 +1,5 @@
+//! Converts Serenity messages to core types.
+
 use bridge_core::{Attachment, Channel, Message, User};
 use serenity::model::channel::Message as SerenityMessage;
 

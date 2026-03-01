@@ -1,3 +1,5 @@
+//! IRC platform adapter for the bridge.
+
 mod adapter;
 mod convert;
 mod fetch;

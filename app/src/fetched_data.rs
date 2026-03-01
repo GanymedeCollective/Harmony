@@ -1,3 +1,5 @@
+//! Serializable cache of discovered channels and users per platform
+
 use std::collections::HashMap;
 use std::path::Path;
 

@@ -1,3 +1,5 @@
+//! Sending a message to a target channel.
+
 use std::error::Error;
 
 use crate::BoxFuture;

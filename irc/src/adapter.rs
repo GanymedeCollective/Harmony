@@ -1,3 +1,5 @@
+//! Connects to IRC, spawns the message stream, produces a `PlatformHandle`.
+
 use bridge_core::{
     BoxFuture, Channel, Message, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, User,
 };

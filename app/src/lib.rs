@@ -1,11 +1,11 @@
+//! Composition root: path resolution and platform adapter wiring
+
 pub mod config;
-pub mod enrich;
 pub mod events;
 pub mod fetched_data;
 pub mod logger;
-pub mod profiles;
+pub mod profile;
 pub mod router;
-pub mod user_profile;
 
 use std::path::{Path, PathBuf};
 

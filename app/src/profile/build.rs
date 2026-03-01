@@ -1,8 +1,11 @@
+//! Builds the user-profile lookup table from config links and cross-platform name matching.
+
 use std::collections::HashMap;
 
 use crate::config::UserLink;
 use crate::fetched_data::FetchedData;
-use crate::user_profile::UserProfile;
+
+use super::UserProfile;
 
 /// Build user profiles from config-defined user links
 pub fn build_from_config(links: &[UserLink]) -> HashMap<String, UserProfile> {

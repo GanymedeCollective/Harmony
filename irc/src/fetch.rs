@@ -1,3 +1,5 @@
+//! One-shot IRC connection to discover channels and users via LIST/NAMES.
+
 use std::collections::HashSet;
 use std::time::Duration;
 

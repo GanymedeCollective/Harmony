@@ -1,3 +1,5 @@
+//! Starts a Serenity client, produces a `PlatformHandle`.
+
 use bridge_core::{
     BoxFuture, Channel, Message, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, User,
 };
