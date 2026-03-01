@@ -10,7 +10,7 @@ Usage
 
 ```
 bridge                        # run the bridge
-bridge fetch                  # fetch channels/users from all platforms, writes fetched_data.toml
+bridge-fetch                  # fetch channels/users from all platforms, writes fetched_data.toml
 bridge -c path/to/config.toml # custom config (defaults to runtime/config.toml or $BRIDGE_RUNTIME_DIR)
 bridge -v/-vv                 # debug / trace logging
 bridge --log-path bridge.log  # log to file instead of stderr

@@ -1,19 +1,13 @@
-mod args;
-mod config;
-mod enrich;
-mod events;
-mod fetch;
-mod fetched_data;
-mod logger;
-mod profiles;
-mod router;
-mod user_profile;
-
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use anyhow::Result;
+use bridge::config::{ChannelLink, UserLink};
+use bridge::fetched_data::FetchedData;
+use bridge::router::ChannelRouter;
+use bridge::user_profile::UserProfile;
+use bridge::{config, enrich, events, profiles};
 use bridge_core::{
     Channel, DEFAULT_CHANNEL_BUFFER, Message, MetaEvent, PlatformAdapter, PlatformHandle,
     PlatformId,
@@ -21,57 +15,32 @@ use bridge_core::{
 use clap::Parser;
 use tokio::sync::{RwLock, mpsc};
 
-use crate::config::{ChannelLink, UserLink};
-use crate::fetched_data::FetchedData;
-use crate::router::ChannelRouter;
-use crate::user_profile::UserProfile;
+#[derive(Parser)]
+#[command(about = "IRC-Discord bridge")]
+struct Args {
+    #[arg(short, long, value_name = "PATH")]
+    config: Option<PathBuf>,
 
-fn resolve_paths(config_arg: Option<&Path>) -> (PathBuf, PathBuf) {
-    if let Some(config_path) = config_arg {
-        let runtime_dir = config_path
-            .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from("."));
-        (runtime_dir, config_path.to_path_buf())
-    } else {
-        let runtime_dir = std::env::var("BRIDGE_RUNTIME_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from("runtime"));
-        let config_path = runtime_dir.join("config.toml");
-        (runtime_dir, config_path)
-    }
-}
+    #[arg(long)]
+    log_path: Option<PathBuf>,
 
-/// The only place that knows about specific platform crates
-fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
-    vec![
-        Box::new(bridge_irc::IrcAdapter::new(
-            cfg.irc.to_irc_config(),
-            cfg.irc.nickname.clone(),
-        )),
-        Box::new(bridge_discord::DiscordAdapter::new(
-            cfg.discord.token.clone(),
-        )),
-    ]
+    #[arg(short, action = clap::ArgAction::Count)]
+    verbose: u8,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let args = args::Args::parse();
-    logger::init(args.verbose, args.log_path.as_deref());
+    let args = Args::parse();
+    bridge::logger::init(args.verbose, args.log_path.as_deref());
 
-    let (runtime_dir, config_path) = resolve_paths(args.config.as_deref());
+    let (runtime_dir, config_path) = bridge::resolve_paths(args.config.as_deref());
 
     log::info!("config: {}", config_path.display());
 
     let cfg = config::load(&config_path)?;
+    let adapters = bridge::create_adapters(&cfg);
 
-    let adapters = create_adapters(&cfg);
-
-    match args.command {
-        Some(args::Command::Fetch) => fetch::cmd_fetch(&adapters, &runtime_dir).await,
-        None => cmd_run(cfg, adapters, &runtime_dir).await,
-    }
+    cmd_run(cfg, adapters, &runtime_dir).await
 }
 
 async fn cmd_run(
@@ -80,7 +49,7 @@ async fn cmd_run(
     runtime_dir: &Path,
 ) -> Result<()> {
     let fetched_path = runtime_dir.join("fetched_data.toml");
-    let fetched = fetched_data::FetchedData::load(&fetched_path)?;
+    let fetched = FetchedData::load(&fetched_path)?;
 
     let (msg_tx, mut msg_rx) = mpsc::channel::<(PlatformId, Message)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
@@ -97,7 +66,6 @@ async fn cmd_run(
         handles.insert(handle.id.to_string(), handle);
     }
 
-    // Drop our copies so channels close when all platforms stop
     drop(msg_tx);
     drop(event_tx);
 
