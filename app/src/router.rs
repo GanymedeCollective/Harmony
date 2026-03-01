@@ -1,6 +1,8 @@
-//! This will be changed soon, I realize this is not the right approach
+//! Channel routing: groups of bridged channels across platforms.
 
 use std::collections::HashMap;
+
+use bridge_utils::PeerGroups;
 
 use crate::config::ChannelLink;
 use crate::fetched_data::FetchedData;
@@ -11,37 +13,26 @@ pub struct ChannelRef {
     pub channel: String,
 }
 
-/// Routes messages between channels across platforms
+/// Routes messages between bridged channel groups
 pub struct ChannelRouter {
-    routes: HashMap<ChannelRef, Vec<ChannelRef>>,
+    groups: PeerGroups<ChannelRef>,
+}
+
+impl Default for ChannelRouter {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ChannelRouter {
     pub fn new() -> Self {
         Self {
-            routes: HashMap::new(),
+            groups: PeerGroups::new(),
         }
     }
 
-    pub fn add_bidirectional(&mut self, p1: &str, c1: &str, p2: &str, c2: &str) {
-        let ref1 = ChannelRef {
-            platform: p1.to_owned(),
-            channel: c1.to_owned(),
-        };
-        let ref2 = ChannelRef {
-            platform: p2.to_owned(),
-            channel: c2.to_owned(),
-        };
-
-        let targets = self.routes.entry(ref1.clone()).or_default();
-        if !targets.contains(&ref2) {
-            targets.push(ref2.clone());
-        }
-
-        let targets = self.routes.entry(ref2).or_default();
-        if !targets.contains(&ref1) {
-            targets.push(ref1);
-        }
+    pub fn link(&mut self, refs: &[ChannelRef]) {
+        self.groups.link(refs);
     }
 
     pub fn targets(&self, platform: &str, channel: &str) -> Vec<ChannelRef> {
@@ -49,25 +40,32 @@ impl ChannelRouter {
             platform: platform.to_owned(),
             channel: channel.to_owned(),
         };
-        self.routes.get(&key).cloned().unwrap_or_default()
+        self.groups
+            .peers(&key)
+            .map(|peers| peers.into_iter().cloned().collect())
+            .unwrap_or_default()
     }
 
-    pub fn pair_count(&self) -> usize {
-        self.routes.len() / 2
+    pub fn bridge_count(&self) -> usize {
+        self.groups.group_count()
+    }
+
+    pub fn compact(&mut self) {
+        self.groups.compact();
     }
 
     /// Build a ChannelRouter from config-defined channel links
     pub fn from_config(links: &[ChannelLink]) -> Self {
         let mut router = Self::new();
         for link in links {
-            let entries: Vec<(&String, &String)> = link.iter().collect();
-            for i in 0..entries.len() {
-                for j in (i + 1)..entries.len() {
-                    let (p1, c1) = entries[i];
-                    let (p2, c2) = entries[j];
-                    router.add_bidirectional(p1, c1, p2, c2);
-                }
-            }
+            let refs: Vec<ChannelRef> = link
+                .iter()
+                .map(|(platform, channel)| ChannelRef {
+                    platform: platform.clone(),
+                    channel: channel.clone(),
+                })
+                .collect();
+            router.link(&refs);
         }
         router
     }
@@ -98,7 +96,16 @@ impl ChannelRouter {
                             p2,
                             ch2.name
                         );
-                        self.add_bidirectional(p1, &ch1.id, p2, &ch2.id);
+                        self.link(&[
+                            ChannelRef {
+                                platform: p1.clone(),
+                                channel: ch1.id.clone(),
+                            },
+                            ChannelRef {
+                                platform: p2.clone(),
+                                channel: ch2.id.clone(),
+                            },
+                        ]);
                     }
                 }
             }

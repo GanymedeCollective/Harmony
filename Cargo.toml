@@ -1,3 +1,3 @@
 [workspace]
-members = ["core", "discord", "irc", "app"]
+members = ["core", "utils", "discord", "irc", "app"]
 resolver = "2"

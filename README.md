@@ -53,6 +53,7 @@ Architecture
 
 ```
 core/      platform-agnostic types and traits (Message, User, Channel, PlatformAdapter, MessageSender)
+utils/     shared data structures (PeerGroups)
 irc/       IRC adapter (irc crate + stream handling)
 discord/   Discord adapter (serenity + webhooks)
 app/       composition root: wires adapters, routes messages, handles events

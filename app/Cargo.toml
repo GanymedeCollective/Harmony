@@ -17,6 +17,7 @@ path = "src/bin/fetch.rs"
 
 [dependencies]
 bridge-core = { path = "../core" }
+bridge-utils = { path = "../utils" }
 bridge-irc = { path = "../irc" }
 bridge-discord = { path = "../discord" }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
