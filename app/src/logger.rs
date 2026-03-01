@@ -1,3 +1,5 @@
+//! Logger
+
 use std::fs::OpenOptions;
 use std::path::Path;
 

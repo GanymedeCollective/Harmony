@@ -1,3 +1,5 @@
+//! This will be changed soon, I realize this is not the right approach
+
 use std::collections::HashMap;
 
 use crate::config::ChannelLink;

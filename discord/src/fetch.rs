@@ -1,3 +1,5 @@
+//! Queries Discord guilds for text channels and members.
+
 use anyhow::Result;
 use bridge_core::{Channel, User};
 use serenity::all::ChannelType;

@@ -1,3 +1,5 @@
+//! Platform-agnostic types and traits for the bridge
+
 mod adapter;
 mod attachment;
 mod channel;

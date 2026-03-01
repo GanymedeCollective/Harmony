@@ -1,3 +1,5 @@
+//! Lifecycle contract for platform crates
+
 use std::error::Error;
 
 use tokio::sync::{mpsc, oneshot};

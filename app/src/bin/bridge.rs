@@ -1,3 +1,5 @@
+//! Starts adapters, runs the message-relay and event loops
+
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -5,9 +7,9 @@ use std::sync::Arc;
 use anyhow::Result;
 use bridge::config::{ChannelLink, UserLink};
 use bridge::fetched_data::FetchedData;
+use bridge::profile::UserProfile;
 use bridge::router::ChannelRouter;
-use bridge::user_profile::UserProfile;
-use bridge::{config, enrich, events, profiles};
+use bridge::{config, events, profile};
 use bridge_core::{
     Channel, DEFAULT_CHANNEL_BUFFER, Message, MetaEvent, PlatformAdapter, PlatformHandle,
     PlatformId,
@@ -92,7 +94,7 @@ async fn cmd_run(
                 };
                 {
                     let p = profiles.read().await;
-                    enrich::enrich_message(&mut msg, &p);
+                    profile::enrich::enrich_message(&mut msg, &p);
                 }
                 for target in &targets {
                     if let Some(handle) = handles.get(target.platform.as_str()) {
@@ -144,8 +146,8 @@ fn rebuild_all(
     let mut router = ChannelRouter::from_config(config_channels);
     router.auto_correlate(fetched);
 
-    let mut profs = profiles::build_from_config(config_users);
-    profiles::auto_correlate(fetched, &mut profs);
+    let mut profs = profile::build::build_from_config(config_users);
+    profile::build::auto_correlate(fetched, &mut profs);
 
     (router, profs)
 }

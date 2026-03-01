@@ -1,8 +1,10 @@
+//! Stamps outgoing messages with resolved user profiles (display name, avatar).
+
 use std::collections::HashMap;
 
 use bridge_core::Message;
 
-use crate::user_profile::UserProfile;
+use super::UserProfile;
 
 pub fn enrich_message(msg: &mut Message, profiles: &HashMap<String, UserProfile>) {
     let key = msg.author.id.as_deref().unwrap_or(&msg.author.name);

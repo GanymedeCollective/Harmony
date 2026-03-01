@@ -1,3 +1,5 @@
+//! Converts IRC protocol messages to core types.
+
 use bridge_core::{Channel, Message, User};
 use irc::proto::Command;
 

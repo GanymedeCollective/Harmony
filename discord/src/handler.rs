@@ -1,3 +1,5 @@
+//! Serenity event handler: forwards Discord gateway events as core messages and meta-events.
+
 use async_trait::async_trait;
 use bridge_core::{Message, MetaEvent, PlatformId, User};
 use serenity::all::{

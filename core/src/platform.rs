@@ -1,3 +1,5 @@
+//! Opaque identifier for a chat platform (e.g. "irc", "discord").
+
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
