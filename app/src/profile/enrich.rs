@@ -1,18 +1,24 @@
-//! Stamps outgoing messages with resolved user profiles (display name, avatar).
-
-use std::collections::HashMap;
+//! Stamps outgoing messages with resolved user metadata (display name, avatar).
 
 use bridge_core::Message;
+use bridge_utils::PeerGroups;
 
-use super::UserProfile;
+use super::{UserMeta, UserRef};
 
-pub fn enrich_message(msg: &mut Message, profiles: &HashMap<String, UserProfile>) {
-    let key = msg.author.id.as_deref().unwrap_or(&msg.author.name);
-    if let Some(profile) = profiles.get(key) {
-        if let Some(name) = &profile.display_name {
+pub fn enrich_message(msg: &mut Message, platform: &str, profiles: &PeerGroups<UserRef, UserMeta>) {
+    let user_ref = UserRef {
+        platform: platform.to_owned(),
+        user_id: msg
+            .author
+            .id
+            .clone()
+            .unwrap_or_else(|| msg.author.name.clone()),
+    };
+    if let Some(meta) = profiles.metadata(&user_ref) {
+        if let Some(name) = &meta.display_name {
             msg.author.name = name.clone();
         }
-        if let Some(url) = &profile.avatar_url {
+        if let Some(url) = &meta.avatar_url {
             msg.author.avatar_url = Some(url.clone());
         }
     }

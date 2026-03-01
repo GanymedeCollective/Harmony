@@ -7,13 +7,14 @@ use std::sync::Arc;
 use anyhow::Result;
 use bridge::config::{ChannelLink, UserLink};
 use bridge::fetched_data::FetchedData;
-use bridge::profile::UserProfile;
+use bridge::profile::{UserMeta, UserRef};
 use bridge::router::ChannelRouter;
 use bridge::{config, events, profile};
 use bridge_core::{
     Channel, DEFAULT_CHANNEL_BUFFER, Message, MetaEvent, PlatformAdapter, PlatformHandle,
     PlatformId,
 };
+use bridge_utils::PeerGroups;
 use clap::Parser;
 use tokio::sync::{RwLock, mpsc};
 
@@ -74,9 +75,9 @@ async fn cmd_run(
     let (initial_routes, initial_profiles) = rebuild_all(&fetched, &cfg.channels, &cfg.users);
 
     log::info!(
-        "bridge ready: {} channel route(s), {} user profile(s)",
-        initial_routes.pair_count(),
-        initial_profiles.len(),
+        "bridge ready: {} channel bridge(s), {} user group(s)",
+        initial_routes.bridge_count(),
+        initial_profiles.group_count(),
     );
 
     let routes = Arc::new(RwLock::new(initial_routes));
@@ -94,7 +95,7 @@ async fn cmd_run(
                 };
                 {
                     let p = profiles.read().await;
-                    profile::enrich::enrich_message(&mut msg, &p);
+                    profile::enrich::enrich_message(&mut msg, &source_id, &p);
                 }
                 for target in &targets {
                     if let Some(handle) = handles.get(target.platform.as_str()) {
@@ -142,12 +143,14 @@ fn rebuild_all(
     fetched: &FetchedData,
     config_channels: &[ChannelLink],
     config_users: &[UserLink],
-) -> (ChannelRouter, HashMap<String, UserProfile>) {
+) -> (ChannelRouter, PeerGroups<UserRef, UserMeta>) {
     let mut router = ChannelRouter::from_config(config_channels);
     router.auto_correlate(fetched);
+    router.compact();
 
-    let mut profs = profile::build::build_from_config(config_users);
-    profile::build::auto_correlate(fetched, &mut profs);
+    let mut profiles = profile::build::build_from_config(config_users);
+    profile::build::auto_correlate(fetched, &mut profiles);
+    profiles.compact();
 
-    (router, profs)
+    (router, profiles)
 }
