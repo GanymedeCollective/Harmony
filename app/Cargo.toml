@@ -3,6 +3,18 @@ name = "bridge"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "bridge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "bridge"
+path = "src/bin/bridge.rs"
+
+[[bin]]
+name = "bridge-fetch"
+path = "src/bin/fetch.rs"
+
 [dependencies]
 bridge-core = { path = "../core" }
 bridge-irc = { path = "../irc" }

@@ -1,11 +1,43 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Result;
+use bridge::config;
+use bridge::fetched_data::FetchedData;
 use bridge_core::PlatformAdapter;
+use clap::Parser;
 
-use crate::fetched_data::FetchedData;
+#[derive(Parser)]
+#[command(about = "Fetch channels/users from all platforms")]
+struct Args {
+    #[arg(short, long, value_name = "PATH")]
+    config: Option<PathBuf>,
 
-pub async fn cmd_fetch(adapters: &[Box<dyn PlatformAdapter>], runtime_dir: &Path) -> Result<()> {
+    #[arg(long)]
+    log_path: Option<PathBuf>,
+
+    #[arg(short, action = clap::ArgAction::Count)]
+    verbose: u8,
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let args = Args::parse();
+    bridge::logger::init(args.verbose, args.log_path.as_deref());
+
+    let (runtime_dir, config_path) = bridge::resolve_paths(args.config.as_deref());
+
+    log::info!("config: {}", config_path.display());
+
+    let cfg = config::load(&config_path)?;
+    let adapters = bridge::create_adapters(&cfg);
+
+    cmd_fetch(&adapters, &runtime_dir).await
+}
+
+async fn cmd_fetch(
+    adapters: &[Box<dyn PlatformAdapter>],
+    runtime_dir: &std::path::Path,
+) -> Result<()> {
     log::info!("fetching channel and user data from all platforms...");
 
     let mut data = FetchedData::default();
