@@ -1,0 +1,8 @@
+[package]
+name = "bridge-testing"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bridge-core = { path = "../core" }
+tokio = { version = "1", features = ["sync", "rt", "time"] }

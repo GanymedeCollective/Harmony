@@ -6,6 +6,7 @@ pub mod fetched_data;
 pub mod logger;
 pub mod profile;
 pub mod router;
+pub mod run;
 
 use std::path::{Path, PathBuf};
 
