@@ -111,11 +111,10 @@ pub async fn run(
                         *routes.write().await = new_routes;
                         *profiles.write().await = new_profiles;
 
-                        if let Some(path) = &persist_path {
-                            if let Err(e) = f.save(path) {
+                        if let Some(path) = &persist_path
+                            && let Err(e) = f.save(path) {
                                 log::error!("failed to save fetched data: {e}");
                             }
-                        }
                     }
                 }
                 else => break,
