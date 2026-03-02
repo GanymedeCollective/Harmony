@@ -4,7 +4,7 @@ port = 443
 use_tls = true
 accept_invalid_certs = true
 nickname = "ACU-BRIDGE"
-channels = ["#test-irc-haha", "#articles-or-confs"]
+channels = ["#general", "#tech", "#shitpost", "#annonces", "#horreurs-au-travail", "#test-irc", "#test-irc-haha"]
 
 [discord]
 token = "MTQ3NTc5MzcwNzU0MTIwNTA1NQ.G_Y949.EizACn-u235GBmCnsgMGeOwdu7Q9IJv2yxQ6Eg"

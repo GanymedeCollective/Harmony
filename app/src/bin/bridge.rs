@@ -46,8 +46,14 @@ async fn main() -> Result<()> {
     log::info!("bridge is running, ctrl+c to stop");
     tokio::signal::ctrl_c().await?;
 
-    log::info!("shutting down...");
-    handle.shutdown().await;
+    log::info!("shutting down... (press ctrl+c again to force)");
+    tokio::select! {
+        _ = handle.shutdown() => {}
+        _ = tokio::signal::ctrl_c() => {
+            log::warn!("forced shutdown");
+            std::process::exit(1);
+        }
+    }
 
     Ok(())
 }
