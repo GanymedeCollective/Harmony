@@ -143,6 +143,7 @@ dependencies = [
  "bridge-core",
  "bridge-discord",
  "bridge-irc",
+ "bridge-testing",
  "bridge-utils",
  "clap",
  "env_logger",
@@ -181,6 +182,14 @@ dependencies = [
  "futures",
  "irc",
  "log",
+ "tokio",
+]
+
+[[package]]
+name = "bridge-testing"
+version = "0.1.0"
+dependencies = [
+ "bridge-core",
  "tokio",
 ]
 
