@@ -13,6 +13,30 @@ token = "MTQ3NTc5MzcwNzU0MTIwNTA1NQ.G_Y949.EizACn-u235GBmCnsgMGeOwdu7Q9IJv2yxQ6E
 irc = "#test-irc-haha"
 discord = "1475796938766160025"
 
+[[channels]]
+irc="#general"
+discord="1226863196120547421"
+
+[[channels]]
+irc="#tech"
+discord="1346835536244899910"
+
+[[channels]]
+irc="#shitpost"
+discord="1226952616794263654"
+
+[[channels]]
+irc="#annonces"
+discord="1336194091955785750"
+
+[[channels]]
+irc="#horreurs-au-travail"
+discord="1460990106029527195"
+
+[[channels]]
+irc="#test-irc"
+discord="1475561757748494490"
+
 [[users]]
 irc = "gogo94210"
 discord = "254606390843277312"

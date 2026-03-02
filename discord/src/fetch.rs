@@ -16,7 +16,7 @@ pub(crate) async fn fetch_guild_data(
 
     for guild_info in &guilds {
         let guild_id = guild_info.id;
-        log::info!(
+        log::debug!(
             "discord: fetching data for guild \"{}\" ({})",
             guild_info.name,
             guild_id

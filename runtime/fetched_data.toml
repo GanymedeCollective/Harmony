@@ -1,3 +1,55 @@
+[[platforms.irc.channels]]
+id = "#general-irc"
+name = "#general-irc"
+
+[[platforms.irc.channels]]
+id = "#shitpost"
+name = "#shitpost"
+
+[[platforms.irc.channels]]
+id = "#annonces"
+name = "#annonces"
+
+[[platforms.irc.channels]]
+id = "#horreurs-au-travail"
+name = "#horreurs-au-travail"
+
+[[platforms.irc.channels]]
+id = "#general"
+name = "#general"
+
+[[platforms.irc.channels]]
+id = "#test-irc"
+name = "#test-irc"
+
+[[platforms.irc.channels]]
+id = "#test-irc-haha"
+name = "#test-irc-haha"
+
+[[platforms.irc.channels]]
+id = "#tech"
+name = "#tech"
+
+[[platforms.irc.users]]
+id = "BEN10DOBRAZILLL"
+name = "BEN10DOBRAZILLL"
+
+[[platforms.irc.users]]
+id = "JaliW"
+name = "JaliW"
+
+[[platforms.irc.users]]
+id = "futsal"
+name = "futsal"
+
+[[platforms.irc.users]]
+id = "therealcoochieman"
+name = "therealcoochieman"
+
+[[platforms.irc.users]]
+id = "artemisfowl_"
+name = "artemisfowl_"
+
 [[platforms.discord.channels]]
 id = "1226863196120547421"
 name = "general"
@@ -230,6 +282,10 @@ name = "test-irc-hahaha"
 id = "1475816472747184158"
 name = "grrrrr-les-tigres"
 
+[[platforms.discord.channels]]
+id = "1477638334816977098"
+name = "rebranding"
+
 [[platforms.discord.users]]
 id = "178918242541109248"
 name = "brydd_"
@@ -371,7 +427,7 @@ avatar_url = "https://cdn.discordapp.com/avatars/270658740456259586/533e1ce07041
 id = "272149875939082242"
 name = "apeuh"
 display_name = "napafait lana del rey avec theo"
-avatar_url = "https://cdn.discordapp.com/avatars/272149875939082242/3d6e091e80e7e93ed9c29aa0aa3e14ff.webp?size=1024"
+avatar_url = "https://cdn.discordapp.com/avatars/272149875939082242/38c4981ffefc60bf4af1d4954df2a8d3.webp?size=1024"
 
 [[platforms.discord.users]]
 id = "280054929576689665"
