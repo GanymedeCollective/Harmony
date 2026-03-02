@@ -62,14 +62,8 @@ impl PlatformAdapter for DiscordAdapter {
                 }
             });
 
-            let sm = shard_manager.clone();
-            tokio::spawn(async move {
-                let _ = shutdown_rx.await;
-                sm.shutdown_all().await;
-            });
-
             let pid = platform_id.clone();
-            tokio::spawn(async move {
+            let fetch_handle = tokio::spawn(async move {
                 log::info!("discord: performing initial data fetch...");
                 match crate::fetch::fetch_guild_data(&http).await {
                     Ok((channels, users)) => {
@@ -94,6 +88,13 @@ impl PlatformAdapter for DiscordAdapter {
                     }
                     Err(e) => log::error!("discord: initial data fetch failed: {e}"),
                 }
+            });
+
+            let sm = shard_manager.clone();
+            tokio::spawn(async move {
+                let _ = shutdown_rx.await;
+                fetch_handle.abort();
+                sm.shutdown_all().await;
             });
 
             Ok(PlatformHandle {
