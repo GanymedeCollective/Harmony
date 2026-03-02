@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 bridge-core = { path = "../core" }
+bridge = { path = "../app" }
 tokio = { version = "1", features = ["sync", "rt", "time"] }

@@ -57,6 +57,7 @@ utils/     shared data structures (PeerGroups)
 irc/       IRC adapter (irc crate + stream handling)
 discord/   Discord adapter (serenity + webhooks)
 app/       composition root: wires adapters, routes messages, handles events
+testing/   fake platforms + test DSL for integration tests
 runtime/   config + fetched data (runtime files)
 ```
 
