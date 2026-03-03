@@ -9,7 +9,7 @@ use serenity::all::{
 use serenity::model::channel::Message as SerenityMessage;
 use tokio::sync::mpsc;
 
-pub(crate) struct Handler {
+pub struct Handler {
     pub msg_tx: mpsc::Sender<(PlatformId, Message)>,
     pub event_tx: mpsc::Sender<MetaEvent>,
     pub platform_id: PlatformId,
