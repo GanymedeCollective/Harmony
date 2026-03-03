@@ -26,10 +26,12 @@ pub struct FakePlatform {
 }
 
 impl FakePlatform {
+    #[must_use]
     pub fn new(name: &str) -> (Box<dyn PlatformAdapter>, FakeControl) {
         Self::builder(name).build()
     }
 
+    #[must_use]
     pub fn builder(name: &str) -> FakePlatformBuilder {
         FakePlatformBuilder {
             id: PlatformId::new(name),
@@ -116,7 +118,7 @@ pub struct FakeControl {
 }
 
 impl FakeControl {
-    pub fn platform_id(&self) -> &PlatformId {
+    pub const fn platform_id(&self) -> &PlatformId {
         &self.platform_id
     }
 
@@ -152,16 +154,19 @@ pub struct FakePlatformBuilder {
 }
 
 impl FakePlatformBuilder {
+    #[must_use]
     pub fn with_channels(mut self, channels: Vec<Channel>) -> Self {
         self.channels = channels;
         self
     }
 
+    #[must_use]
     pub fn with_users(mut self, users: Vec<User>) -> Self {
         self.users = users;
         self
     }
 
+    #[must_use]
     pub fn build(self) -> (Box<dyn PlatformAdapter>, FakeControl) {
         let (inject_msg_tx, inject_msg_rx) = mpsc::channel(64);
         let (inject_event_tx, inject_event_rx) = mpsc::channel(64);

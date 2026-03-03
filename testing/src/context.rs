@@ -98,6 +98,7 @@ impl TestWorld {
 }
 
 impl TestContext {
+    #[must_use]
     pub fn control(&self, platform: &str) -> &FakeControl {
         self.controls
             .get(platform)
@@ -106,11 +107,12 @@ impl TestContext {
 
     /// Look up a user's platform-specific identity. Panics if the user has no
     /// identity on that platform.
+    #[must_use]
     pub fn user_name(&self, canonical: &str, platform: &str) -> &str {
         self.users
             .get(canonical)
             .and_then(|spec| spec.identities.get(platform))
-            .map(|s| s.as_str())
+            .map(std::string::String::as_str)
             .unwrap_or_else(|| {
                 panic!("user '{canonical}' has no identity on platform '{platform}'")
             })
@@ -119,6 +121,7 @@ impl TestContext {
     /// Resolve an author name for a platform: if it matches a known canonical
     /// user name, return the platform-specific identity; otherwise return the
     /// name as-is.
+    #[must_use]
     pub fn resolve_author(&self, canonical_or_raw: &str, platform: &str) -> String {
         self.users
             .get(canonical_or_raw)
