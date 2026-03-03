@@ -69,6 +69,21 @@ Messages flow through channels (`mpsc`), get enriched with user profiles, and
 are relayed to targets. Meta-events (joins, leaves, renames) update a local
 cache (`fetched_data.toml`) that feeds auto-correlation.
 
+Docker
+------
+
+The app can be built and run using Docker. To build the image, run:
+
+```sh
+docker build -t bridge .
+```
+
+To run the container, use:
+
+```sh
+docker run -v /path/to/config.toml:/config.toml -d bridge -c /config.toml
+```
+
 TODO
 ----
 
