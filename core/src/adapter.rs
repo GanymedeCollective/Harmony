@@ -21,6 +21,7 @@ pub trait PlatformAdapter: Send {
         event_tx: mpsc::Sender<MetaEvent>,
     ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn Error + Send + Sync>>>;
 
+    #[allow(clippy::type_complexity)]
     fn fetch(
         &self,
     ) -> BoxFuture<'_, Result<(Vec<Channel>, Vec<User>), Box<dyn Error + Send + Sync>>>;
