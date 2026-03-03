@@ -10,6 +10,7 @@ use crate::fetched_data::FetchedData;
 use super::{UserMeta, UserRef};
 
 /// Build user peer-groups from config-defined user links
+#[must_use]
 pub fn build_from_config(links: &[UserLink]) -> PeerGroups<UserRef, UserMeta> {
     let mut groups = PeerGroups::new();
     for link in links {

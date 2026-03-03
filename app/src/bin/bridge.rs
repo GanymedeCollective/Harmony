@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
 
     log::info!("shutting down... (press ctrl+c again to force)");
     tokio::select! {
-        _ = handle.shutdown() => {}
+        () = handle.shutdown() => {}
         _ = tokio::signal::ctrl_c() => {
             log::warn!("forced shutdown");
             std::process::exit(1);

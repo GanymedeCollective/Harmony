@@ -16,19 +16,18 @@ pub fn resolve_paths(config_arg: Option<&Path>) -> (PathBuf, PathBuf) {
     if let Some(config_path) = config_arg {
         let runtime_dir = config_path
             .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from("."));
+            .map_or_else(|| PathBuf::from("."), std::path::Path::to_path_buf);
         (runtime_dir, config_path.to_path_buf())
     } else {
         let runtime_dir = std::env::var("BRIDGE_RUNTIME_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from("runtime"));
+            .map_or_else(|_| PathBuf::from("runtime"), PathBuf::from);
         let config_path = runtime_dir.join("config.toml");
         (runtime_dir, config_path)
     }
 }
 
 /// The only place that knows about specific platform crates.
+#[must_use]
 pub fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
     vec![
         Box::new(bridge_irc::IrcAdapter::new(

@@ -3,7 +3,7 @@
 use std::fs::OpenOptions;
 use std::path::Path;
 
-fn verbosity_to_level(v: u8) -> log::LevelFilter {
+const fn verbosity_to_level(v: u8) -> log::LevelFilter {
     match v {
         0 => log::LevelFilter::Info,
         1 => log::LevelFilter::Debug,
@@ -11,6 +11,11 @@ fn verbosity_to_level(v: u8) -> log::LevelFilter {
     }
 }
 
+/// Init logger with the given `verbosity` and at the given `log_path` (if specified).
+///
+/// # Panics
+///
+/// Panics if given `log_path` could not be used to create a log file.
 pub fn init(verbosity: u8, log_path: Option<&Path>) {
     let mut builder = env_logger::Builder::new();
     builder.filter_level(verbosity_to_level(verbosity));

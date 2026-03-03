@@ -164,9 +164,8 @@ impl FetchedData {
     ) -> bool {
         let data = self.platform_mut(platform);
         if let Some(user) = data.users.iter_mut().find(|u| u.id == old_id) {
-            user.id = new_id.to_owned();
-            user.name = new_name.to_owned();
-            true
+            user.id = new_id.to_string();
+            user.name = new_name.to_string();
         } else {
             data.users.push(FetchedUser {
                 id: new_id.to_owned(),
@@ -174,7 +173,7 @@ impl FetchedData {
                 display_name: None,
                 avatar_url: None,
             });
-            true
         }
+        true
     }
 }
