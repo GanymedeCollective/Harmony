@@ -30,6 +30,7 @@ pub struct IrcSection {
 }
 
 impl IrcSection {
+    #[must_use]
     pub fn to_irc_config(&self) -> bridge_irc::IrcConfig {
         bridge_irc::IrcConfig {
             nickname: Some(self.nickname.clone()),
@@ -43,7 +44,7 @@ impl IrcSection {
     }
 }
 
-fn default_true() -> bool {
+const fn default_true() -> bool {
     true
 }
 

@@ -16,7 +16,7 @@ pub fn enrich_message(msg: &mut Message, platform: &str, profiles: &PeerGroups<U
     };
     if let Some(meta) = profiles.metadata(&user_ref) {
         if let Some(name) = &meta.display_name {
-            msg.author.name = name.clone();
+            msg.author.name.clone_from(name);
         }
         if let Some(url) = &meta.avatar_url {
             msg.author.avatar_url = Some(url.clone());

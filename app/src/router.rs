@@ -25,6 +25,7 @@ impl Default for ChannelRouter {
 }
 
 impl ChannelRouter {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             groups: PeerGroups::new(),
@@ -35,6 +36,7 @@ impl ChannelRouter {
         self.groups.link(refs);
     }
 
+    #[must_use]
     pub fn targets(&self, platform: &str, channel: &str) -> Vec<ChannelRef> {
         let key = ChannelRef {
             platform: platform.to_owned(),
@@ -46,6 +48,7 @@ impl ChannelRouter {
             .unwrap_or_default()
     }
 
+    #[must_use]
     pub fn bridge_count(&self) -> usize {
         self.groups.group_count()
     }
@@ -54,7 +57,8 @@ impl ChannelRouter {
         self.groups.compact();
     }
 
-    /// Build a ChannelRouter from config-defined channel links
+    /// Build a `ChannelRouter` from config-defined channel links
+    #[must_use]
     pub fn from_config(links: &[ChannelLink]) -> Self {
         let mut router = Self::new();
         for link in links {
