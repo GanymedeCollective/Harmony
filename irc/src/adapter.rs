@@ -19,6 +19,7 @@ pub struct IrcAdapter {
 }
 
 impl IrcAdapter {
+    #[must_use]
     pub fn new(config: IrcConfig, nickname: String) -> Self {
         Self {
             config,
@@ -56,7 +57,7 @@ impl PlatformAdapter for IrcAdapter {
 
             tokio::spawn(async move {
                 tokio::select! {
-                    _ = process_stream(stream, msg_tx, event_tx, pid, bot_nickname) => {}
+                () = process_stream(stream, msg_tx, event_tx, pid, bot_nickname) => {}
                     _ = shutdown_rx => {
                         let _ = raw_sender.send(Command::QUIT(Some("Bridge shutting down".to_owned())));
                     }
@@ -84,6 +85,8 @@ impl PlatformAdapter for IrcAdapter {
     }
 }
 
+// TODO: logic should probably be split accordingly, so we can remove the #[allow(...)]
+#[allow(clippy::too_many_lines)]
 async fn process_stream(
     mut stream: ClientStream,
     msg_tx: mpsc::Sender<(PlatformId, Message)>,
@@ -176,7 +179,7 @@ async fn process_stream(
                     continue;
                 };
                 if old_nick.eq_ignore_ascii_case(&bot_nickname) {
-                    bot_nickname = new_nick.clone();
+                    bot_nickname.clone_from(new_nick);
                     continue;
                 }
                 let _ = event_tx
