@@ -1,7 +1,8 @@
 [package]
 name = "bridge-testing"
 version = "0.1.0"
-edition = "2024"
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
 bridge-core = { path = "../core" }
