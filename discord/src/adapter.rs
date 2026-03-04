@@ -13,6 +13,7 @@ pub struct DiscordAdapter {
 }
 
 impl DiscordAdapter {
+    #[must_use]
     pub fn new(token: String) -> Self {
         Self {
             token,
@@ -90,7 +91,7 @@ impl PlatformAdapter for DiscordAdapter {
                 }
             });
 
-            let sm = shard_manager.clone();
+            let sm = shard_manager;
             tokio::spawn(async move {
                 let _ = shutdown_rx.await;
                 fetch_handle.abort();

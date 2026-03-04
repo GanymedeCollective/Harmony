@@ -10,7 +10,7 @@ use irc::client::Client;
 use irc::client::data::Config as IrcConfig;
 use irc::proto::{Command, Response};
 
-pub(crate) async fn fetch_data(
+pub async fn fetch_data(
     config: IrcConfig,
     bot_nickname: &str,
 ) -> Result<(Vec<Channel>, Vec<User>)> {
@@ -30,8 +30,7 @@ pub(crate) async fn fetch_data(
         while let Some(result) = stream.next().await {
             match result {
                 Ok(msg) => match &msg.command {
-                    Command::Response(Response::RPL_ENDOFMOTD, _)
-                    | Command::Response(Response::ERR_NOMOTD, _) => {
+                    Command::Response(Response::RPL_ENDOFMOTD | Response::ERR_NOMOTD, _) => {
                         log::info!("irc: registered, discovering channels via LIST");
                         raw.send(Command::LIST(None, None))?;
                     }

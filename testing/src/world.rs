@@ -28,7 +28,8 @@ pub struct TestWorldBuilder {
 }
 
 impl TestWorld {
-    pub fn builder() -> TestWorldBuilder {
+    #[must_use]
+    pub const fn builder() -> TestWorldBuilder {
         TestWorldBuilder {
             platforms: Vec::new(),
             users: Vec::new(),
@@ -38,14 +39,19 @@ impl TestWorld {
 }
 
 impl TestWorldBuilder {
+    #[must_use]
     pub fn platform(mut self, name: &str, channels: &[&str]) -> Self {
         self.platforms.push(PlatformSpec {
             name: name.to_owned(),
-            channels: channels.iter().map(|s| s.to_string()).collect(),
+            channels: channels
+                .iter()
+                .map(std::string::ToString::to_string)
+                .collect(),
         });
         self
     }
 
+    #[must_use]
     pub fn user(mut self, canonical: &str, identities: &[(&str, &str)]) -> Self {
         self.users.push(UserSpec {
             canonical_name: canonical.to_owned(),
@@ -59,6 +65,7 @@ impl TestWorldBuilder {
         self
     }
 
+    #[must_use]
     pub fn user_with_meta(
         mut self,
         canonical: &str,
@@ -72,12 +79,13 @@ impl TestWorldBuilder {
                 .iter()
                 .map(|(k, v)| (k.to_string(), v.to_string()))
                 .collect(),
-            display_name: display_name.map(|s| s.to_owned()),
-            avatar_url: avatar_url.map(|s| s.to_owned()),
+            display_name: display_name.map(std::borrow::ToOwned::to_owned),
+            avatar_url: avatar_url.map(std::borrow::ToOwned::to_owned),
         });
         self
     }
 
+    #[must_use]
     pub fn link(mut self, pairs: &[(&str, &str)]) -> Self {
         self.channel_links.push(
             pairs
@@ -88,6 +96,7 @@ impl TestWorldBuilder {
         self
     }
 
+    #[must_use]
     pub fn build(self) -> TestWorld {
         TestWorld {
             platforms: self.platforms,

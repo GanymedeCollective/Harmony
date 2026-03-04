@@ -7,3 +7,6 @@ license.workspace = true
 [dependencies]
 http = "1"
 tokio = { version = "1", features = ["sync"] }
+
+[lints]
+workspace = true

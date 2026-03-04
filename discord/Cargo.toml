@@ -11,3 +11,6 @@ serenity = { version = "0.12", default-features = true }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync"] }
 anyhow = "1"
 async-trait = "0.1"
+
+[lints]
+workspace = true

@@ -3,7 +3,7 @@
 use bridge_core::{Attachment, Channel, Message, User};
 use serenity::model::channel::Message as SerenityMessage;
 
-pub(crate) fn discord_to_core(msg: &SerenityMessage) -> Message {
+pub fn discord_to_core(msg: &SerenityMessage) -> Message {
     let attachments: Vec<Attachment> = msg
         .attachments
         .iter()

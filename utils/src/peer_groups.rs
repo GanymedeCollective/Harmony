@@ -11,11 +11,11 @@ pub struct PeerGroups<T: Eq + Hash + Clone, M = ()> {
     id_of: HashMap<T, usize>,
     /// All inserted items, indexed by Id
     items: Vec<T>,
-    /// For each Id, which GroupId does it belong to
+    /// For each Id, which `GroupId` does it belong to
     group_of: Vec<usize>,
-    /// For each GroupId, the Ids of its members
+    /// For each `GroupId`, the Ids of its members
     members: Vec<Vec<usize>>,
-    /// Per-group metadata, indexed by GroupId
+    /// Per-group metadata, indexed by `GroupId`
     group_metadata: Vec<Option<M>>,
 }
 
@@ -26,6 +26,7 @@ impl<T: Eq + Hash + Clone, M> Default for PeerGroups<T, M> {
 }
 
 impl<T: Eq + Hash + Clone, M> PeerGroups<T, M> {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             id_of: HashMap::new(),
@@ -91,11 +92,12 @@ impl<T: Eq + Hash + Clone, M> PeerGroups<T, M> {
     }
 
     /// Number of non-empty groups
+    #[must_use]
     pub fn group_count(&self) -> usize {
         self.members.iter().filter(|m| !m.is_empty()).count()
     }
 
-    /// Remove tombstones left by merges: reassign GroupIds, shrink `members`
+    /// Remove tombstones left by merges: reassign `GroupIds`, shrink `members`
     /// and `group_metadata`, update `group_of`
     pub fn compact(&mut self) {
         let mut remap: Vec<usize> = vec![0; self.members.len()];

@@ -4,7 +4,7 @@ use anyhow::Result;
 use bridge_core::{Channel, User};
 use serenity::all::ChannelType;
 
-pub(crate) async fn fetch_guild_data(
+pub async fn fetch_guild_data(
     http: &serenity::http::Http,
 ) -> Result<(Vec<Channel>, Vec<User>)> {
     let guilds = http.get_guilds(None, Some(100)).await?;
