@@ -1,7 +1,7 @@
 //! Starts a Serenity client, produces a `PlatformHandle`.
 
 use bridge_core::{
-    BoxFuture, Channel, Message, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, User,
+    BoxFuture, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, PlatformMessage,
 };
 use tokio::sync::{mpsc, oneshot};
 
@@ -29,7 +29,7 @@ impl PlatformAdapter for DiscordAdapter {
 
     fn start(
         self: Box<Self>,
-        msg_tx: mpsc::Sender<(PlatformId, Message)>,
+        msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
     ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn std::error::Error + Send + Sync>>> {
         Box::pin(async move {
@@ -42,7 +42,7 @@ impl PlatformAdapter for DiscordAdapter {
 
             let handler = crate::handler::Handler {
                 msg_tx,
-                event_tx: event_tx.clone(),
+                event_tx,
                 platform_id: platform_id.clone(),
                 bot_user_id: std::sync::OnceLock::new(),
             };
@@ -53,7 +53,7 @@ impl PlatformAdapter for DiscordAdapter {
 
             let http = client.http.clone();
             let shard_manager = client.shard_manager.clone();
-            let sender = DiscordSender::new(http.clone());
+            let sender = DiscordSender::new(http, platform_id.clone());
 
             let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
 
@@ -63,57 +63,19 @@ impl PlatformAdapter for DiscordAdapter {
                 }
             });
 
-            let pid = platform_id.clone();
-            let fetch_handle = tokio::spawn(async move {
-                log::info!("discord: performing initial data fetch...");
-                match crate::fetch::fetch_guild_data(&http).await {
-                    Ok((channels, users)) => {
-                        for ch in channels {
-                            let _ = event_tx
-                                .send(MetaEvent::ChannelCreated {
-                                    platform: pid.clone(),
-                                    id: ch.id,
-                                    name: ch.name,
-                                })
-                                .await;
-                        }
-                        if !users.is_empty() {
-                            let _ = event_tx
-                                .send(MetaEvent::UsersDiscovered {
-                                    platform: pid.clone(),
-                                    users,
-                                })
-                                .await;
-                        }
-                        log::info!("discord: initial data fetch complete");
-                    }
-                    Err(e) => log::error!("discord: initial data fetch failed: {e}"),
-                }
-            });
-
             let sm = shard_manager;
             tokio::spawn(async move {
                 let _ = shutdown_rx.await;
-                fetch_handle.abort();
                 sm.shutdown_all().await;
             });
 
             Ok(PlatformHandle {
                 id: platform_id,
-                sender: Box::new(sender),
+                sender: Box::new(sender.clone()),
+                user_lister: Box::new(sender.clone()),
+                channel_lister: Box::new(sender),
                 shutdown_tx,
             })
-        })
-    }
-
-    fn fetch(
-        &self,
-    ) -> BoxFuture<'_, Result<(Vec<Channel>, Vec<User>), Box<dyn std::error::Error + Send + Sync>>>
-    {
-        Box::pin(async {
-            let http = serenity::http::Http::new(&self.token);
-            let result = crate::fetch::fetch_guild_data(&http).await?;
-            Ok(result)
         })
     }
 }

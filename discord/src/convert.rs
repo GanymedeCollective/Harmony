@@ -1,21 +1,9 @@
 //! Converts Serenity messages to core types.
 
-use bridge_core::{Attachment, Channel, Message, User};
+use bridge_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
 use serenity::model::channel::Message as SerenityMessage;
 
-pub fn discord_to_core(msg: &SerenityMessage) -> Message {
-    let attachments: Vec<Attachment> = msg
-        .attachments
-        .iter()
-        .filter_map(|a| {
-            let url = a.url.parse().ok()?;
-            Some(Attachment {
-                url,
-                filename: a.filename.clone(),
-            })
-        })
-        .collect();
-
+pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> PlatformMessage {
     let mut content = msg.content.clone();
     for attachment in &msg.attachments {
         if !content.is_empty() {
@@ -28,20 +16,21 @@ pub fn discord_to_core(msg: &SerenityMessage) -> Message {
         .member
         .as_ref()
         .and_then(|m| m.nick.clone())
-        .or_else(|| msg.author.global_name.clone());
+        .or_else(|| msg.author.global_name.clone())
+        .or_else(|| Some(msg.author.name.clone()));
 
-    Message {
-        author: User {
-            id: Some(msg.author.id.get().to_string()),
-            name: msg.author.name.clone(),
+    PlatformMessage {
+        author: PlatformUser {
+            platform: platform_id.clone(),
+            id: msg.author.id.get().to_string(),
             display_name,
             avatar_url: msg.author.avatar_url(),
         },
-        channel: Channel {
+        channel: PlatformChannel {
+            platform: platform_id.clone(),
             id: msg.channel_id.get().to_string(),
             name: msg.channel_id.get().to_string(),
         },
         content,
-        attachments,
     }
 }

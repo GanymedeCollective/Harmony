@@ -1,12 +1,12 @@
 //! Lifecycle events (joins, leaves, renames, channel changes).
 
-use crate::{PlatformId, User};
+use crate::{PlatformChannel, PlatformId, PlatformUser};
 
 #[derive(Debug, Clone)]
 pub enum MetaEvent {
     UserJoined {
         platform: PlatformId,
-        user: User,
+        user: PlatformUser,
     },
     UserLeft {
         platform: PlatformId,
@@ -14,22 +14,21 @@ pub enum MetaEvent {
     },
     UserUpdated {
         platform: PlatformId,
-        user: User,
+        user: PlatformUser,
     },
     UserRenamed {
         platform: PlatformId,
         old_id: String,
         new_id: String,
-        new_name: String,
+        new_display_name: Option<String>,
     },
     UsersDiscovered {
         platform: PlatformId,
-        users: Vec<User>,
+        users: Vec<PlatformUser>,
     },
     ChannelCreated {
         platform: PlatformId,
-        id: String,
-        name: String,
+        channel: PlatformChannel,
     },
     ChannelDeleted {
         platform: PlatformId,
@@ -37,7 +36,6 @@ pub enum MetaEvent {
     },
     ChannelUpdated {
         platform: PlatformId,
-        id: String,
-        name: String,
+        channel: PlatformChannel,
     },
 }

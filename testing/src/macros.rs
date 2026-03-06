@@ -1,6 +1,9 @@
 //! DSL macros for integration tests.
 
-/// Define a test world with platforms, users, and channel links.
+/// Define a test world with platforms and users.
+///
+/// Channels with matching names across platforms are automatically linked
+/// via auto-correlation.
 ///
 /// ```ignore
 /// test_world! {
@@ -11,14 +14,10 @@
 ///     users {
 ///         alice: { alpha: "4l1c3", beta: "Alice" },
 ///     }
-///     channels {
-///         alpha "#test" = beta "#test",
-///         alpha "#general" = beta "#general",
-///     }
 /// }
 /// ```
 ///
-/// The `users` and `channels` sections are optional.
+/// The `users` section is optional.
 #[macro_export]
 macro_rules! test_world {
     (
@@ -29,9 +28,6 @@ macro_rules! test_world {
             $( $user:ident : {
                 $($user_platform:ident : $user_name:literal),* $(,)?
             } ),* $(,)?
-        })?
-        $(channels {
-            $( $($link_platform:ident $link_channel:literal)=+ ),* $(,)?
         })?
     ) => {{
         let mut __builder = $crate::TestWorld::builder();
@@ -45,11 +41,6 @@ macro_rules! test_world {
             __builder = __builder.user(
                 stringify!($user),
                 &[ $( (stringify!($user_platform), $user_name) ),* ],
-            );
-        )*)?
-        $($(
-            __builder = __builder.link(
-                &[ $( (stringify!($link_platform), $link_channel) ),+ ],
             );
         )*)?
         __builder.build()
@@ -67,45 +58,49 @@ macro_rules! test_world {
 /// ```
 #[macro_export]
 macro_rules! send {
-    ($ctx:ident, $platform:ident, $author:expr, $channel:expr, $content:expr) => {
+    ($ctx:ident, $platform:ident, $author:expr, $channel:expr, $content:expr) => {{
+        let __author_id = $ctx.resolve_author($author, stringify!($platform));
         $ctx.control(stringify!($platform))
-            .inject_message($crate::Message {
-                author: $crate::User {
-                    id: None,
-                    name: $ctx.resolve_author($author, stringify!($platform)),
-                    display_name: None,
+            .inject_message($crate::PlatformMessage {
+                author: $crate::PlatformUser {
+                    platform: $crate::PlatformId::new(stringify!($platform)),
+                    id: __author_id.clone(),
+                    display_name: Some(__author_id),
                     avatar_url: None,
                 },
-                channel: $crate::Channel {
+                channel: $crate::PlatformChannel {
+                    platform: $crate::PlatformId::new(stringify!($platform)),
                     id: $channel.to_owned(),
                     name: $channel.to_owned(),
                 },
                 content: $content.to_owned(),
-                attachments: vec![],
             })
             .await
-    };
+    }};
 }
 
 /// Wait for the next relayed message on a platform and assert field values.
 ///
-/// Field paths like `author.name` are supported.
+/// The channel assertion extracts the `PlatformChannel` for the receiving
+/// platform from `CoreMessage.channel`.
 ///
 /// ```ignore
 /// expect!(ctx, beta, "#general", {
 ///     content == "hello",
-///     author.name == "Alice",
 /// });
 /// ```
 #[macro_export]
 macro_rules! expect {
     ($ctx:ident, $platform:ident, $channel:expr, { $( $($field:ident).+ == $val:expr ),+ $(,)? }) => {{
-        let (__ch, __msg) = $ctx
+        let __msg = $ctx
             .control(stringify!($platform))
             .next_message(::std::time::Duration::from_secs(2))
             .await
             .expect(concat!("expected ", stringify!($platform), " to receive a message"));
-        assert_eq!(__ch.id, $channel);
+        let __pc = __msg.channel
+            .get_platform_channel(&$crate::PlatformId::new(stringify!($platform)))
+            .expect(concat!("message should have channel alias for ", stringify!($platform)));
+        assert_eq!(__pc.id, $channel);
         $(
             assert_eq!(__msg . $($field).+ , $val);
         )+

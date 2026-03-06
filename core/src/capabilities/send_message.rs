@@ -3,13 +3,11 @@
 use std::error::Error;
 
 use crate::BoxFuture;
-use crate::Channel;
-use crate::Message;
+use crate::CoreMessage;
 
-pub trait MessageSender: Send + Sync + 'static {
+pub trait SendMessage: Send + Sync + 'static {
     fn send_message<'a>(
         &'a self,
-        target: &'a Channel,
-        message: &'a Message,
+        message: &'a CoreMessage,
     ) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>;
 }

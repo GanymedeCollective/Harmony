@@ -1,23 +1,24 @@
 //! Platform-agnostic types and traits for the bridge
 
 mod adapter;
-mod attachment;
-mod channel;
+pub mod capabilities;
+mod channels;
 mod event;
-mod message;
-mod message_sender;
+mod messages;
+pub(crate) mod peers;
 mod platform;
-mod user;
+pub mod run;
+mod users;
 
 pub use adapter::{PlatformAdapter, PlatformHandle};
-pub use attachment::Attachment;
-pub use channel::Channel;
+pub use capabilities::{ListChannels, ListUsers, SendMessage};
+pub use channels::{Channels, CoreChannel, PlatformChannel};
 pub use event::MetaEvent;
-pub use message::Message;
-pub use message_sender::MessageSender;
+pub use futures::future::BoxFuture;
+pub use messages::{CoreMessage, PlatformMessage};
+pub use peers::{Peered, Peers};
 pub use platform::PlatformId;
-pub use user::User;
+pub use users::{CoreUser, PlatformUser, Users};
 
-pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send + 'a>>;
-
+// TODO: better
 pub const DEFAULT_CHANNEL_BUFFER: usize = 256;

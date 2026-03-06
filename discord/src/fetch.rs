@@ -1,12 +1,13 @@
 //! Queries Discord guilds for text channels and members.
 
 use anyhow::Result;
-use bridge_core::{Channel, User};
+use bridge_core::{PlatformChannel, PlatformId, PlatformUser};
 use serenity::all::ChannelType;
 
 pub async fn fetch_guild_data(
     http: &serenity::http::Http,
-) -> Result<(Vec<Channel>, Vec<User>)> {
+    platform_id: &PlatformId,
+) -> Result<(Vec<PlatformChannel>, Vec<PlatformUser>)> {
     let guilds = http.get_guilds(None, Some(100)).await?;
     log::info!("discord: found {} guild(s)", guilds.len());
 
@@ -25,7 +26,8 @@ pub async fn fetch_guild_data(
         let guild_channels = http.get_channels(guild_id).await?;
         for ch in guild_channels {
             if ch.kind == ChannelType::Text {
-                channels.push(Channel {
+                channels.push(PlatformChannel {
+                    platform: platform_id.clone(),
                     id: ch.id.get().to_string(),
                     name: ch.name.clone(),
                 });
@@ -43,10 +45,14 @@ pub async fn fetch_guild_data(
                 if member.user.bot || !seen_users.insert(member.user.id) {
                     continue;
                 }
-                users.push(User {
-                    id: Some(member.user.id.get().to_string()),
-                    name: member.user.name.clone(),
-                    display_name: member.nick.clone(),
+                users.push(PlatformUser {
+                    platform: platform_id.clone(),
+                    id: member.user.id.get().to_string(),
+                    display_name: member
+                        .nick
+                        .clone()
+                        .or_else(|| member.user.global_name.clone())
+                        .or_else(|| Some(member.user.name.clone())),
                     avatar_url: member.user.avatar_url(),
                 });
             }

@@ -11,7 +11,8 @@ const fn verbosity_to_level(v: u8) -> log::LevelFilter {
     }
 }
 
-/// Init logger with the given `verbosity` and at the given `log_path` (if specified).
+/// Init logger with the given `verbosity` and at the given `log_path` (if
+/// specified).
 ///
 /// # Panics
 ///

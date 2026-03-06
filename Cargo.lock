@@ -144,7 +144,6 @@ dependencies = [
  "bridge-discord",
  "bridge-irc",
  "bridge-testing",
- "bridge-utils",
  "clap",
  "env_logger",
  "log",
@@ -157,7 +156,10 @@ dependencies = [
 name = "bridge-core"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "futures",
  "http",
+ "log",
  "tokio",
 ]
 
@@ -177,7 +179,6 @@ dependencies = [
 name = "bridge-irc"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "bridge-core",
  "futures",
  "irc",
@@ -189,14 +190,9 @@ dependencies = [
 name = "bridge-testing"
 version = "0.1.0"
 dependencies = [
- "bridge",
  "bridge-core",
  "tokio",
 ]
-
-[[package]]
-name = "bridge-utils"
-version = "0.1.0"
 
 [[package]]
 name = "bumpalo"

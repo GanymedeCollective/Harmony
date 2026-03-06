@@ -5,7 +5,6 @@ use std::collections::HashMap;
 pub struct TestWorld {
     pub(crate) platforms: Vec<PlatformSpec>,
     pub(crate) users: Vec<UserSpec>,
-    pub(crate) channel_links: Vec<Vec<(String, String)>>,
 }
 
 pub struct PlatformSpec {
@@ -24,7 +23,6 @@ pub struct UserSpec {
 pub struct TestWorldBuilder {
     platforms: Vec<PlatformSpec>,
     users: Vec<UserSpec>,
-    channel_links: Vec<Vec<(String, String)>>,
 }
 
 impl TestWorld {
@@ -33,7 +31,6 @@ impl TestWorld {
         TestWorldBuilder {
             platforms: Vec::new(),
             users: Vec::new(),
-            channel_links: Vec::new(),
         }
     }
 }
@@ -86,22 +83,10 @@ impl TestWorldBuilder {
     }
 
     #[must_use]
-    pub fn link(mut self, pairs: &[(&str, &str)]) -> Self {
-        self.channel_links.push(
-            pairs
-                .iter()
-                .map(|(k, v)| (k.to_string(), v.to_string()))
-                .collect(),
-        );
-        self
-    }
-
-    #[must_use]
     pub fn build(self) -> TestWorld {
         TestWorld {
             platforms: self.platforms,
             users: self.users,
-            channel_links: self.channel_links,
         }
     }
 }

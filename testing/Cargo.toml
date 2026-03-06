@@ -6,7 +6,6 @@ license.workspace = true
 
 [dependencies]
 bridge-core = { path = "../core" }
-bridge = { path = "../app" }
 tokio = { version = "1", features = ["sync", "rt", "time"] }
 
 # Testing does not require the same level of clippy warnings

@@ -10,7 +10,6 @@ log = "0.4"
 irc = "1"
 futures = "0.3"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
-anyhow = "1"
 
 [lints]
 workspace = true
