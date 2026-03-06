@@ -2,7 +2,7 @@
 
 mod adapter;
 mod convert;
-mod fetch;
+mod lister;
 mod sender;
 
 pub use adapter::{IrcAdapter, IrcConfig};

@@ -1,28 +1,28 @@
 //! A controllable platform adapter for integration tests.
 //!
-//! `FakePlatform` implements `PlatformAdapter` and `MessageSender` so tests can
-//! inject messages/events on one side and assert what comes out the other.
+//! `FakePlatform` implements `PlatformAdapter` so tests can inject
+//! messages/events on one side and assert what comes out the other.
 
 use std::error::Error;
 use std::time::Duration;
 
 use bridge_core::{
-    BoxFuture, Channel, Message, MessageSender, MetaEvent, PlatformAdapter, PlatformHandle,
-    PlatformId, User,
+    BoxFuture, CoreMessage, ListChannels, ListUsers, MetaEvent, PlatformAdapter, PlatformChannel,
+    PlatformHandle, PlatformId, PlatformMessage, PlatformUser, SendMessage,
 };
 use tokio::sync::{mpsc, oneshot};
 
 /// Controllable adapter for integration tests.
 ///
 /// Use [`FakePlatform::new`] for a quick default or [`FakePlatform::builder`]
-/// to pre-configure channels/users returned by `fetch()`.
+/// to pre-configure channels/users returned by listing.
 pub struct FakePlatform {
     id: PlatformId,
-    inject_msg_rx: mpsc::Receiver<Message>,
+    inject_msg_rx: mpsc::Receiver<PlatformMessage>,
     inject_event_rx: mpsc::Receiver<MetaEvent>,
-    captured_tx: mpsc::UnboundedSender<(Channel, Message)>,
-    channels: Vec<Channel>,
-    users: Vec<User>,
+    captured_tx: mpsc::UnboundedSender<CoreMessage>,
+    channels: Vec<PlatformChannel>,
+    users: Vec<PlatformUser>,
 }
 
 impl FakePlatform {
@@ -48,7 +48,7 @@ impl PlatformAdapter for FakePlatform {
 
     fn start(
         self: Box<Self>,
-        msg_tx: mpsc::Sender<(PlatformId, Message)>,
+        msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
     ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn Error + Send + Sync>>> {
         Box::pin(async move {
@@ -77,44 +77,64 @@ impl PlatformAdapter for FakePlatform {
                 captured_tx: self.captured_tx,
             };
 
+            let lister = FakeLister {
+                channels: self.channels,
+                users: self.users,
+            };
+
             Ok(PlatformHandle {
                 id,
                 sender: Box::new(sender),
+                user_lister: Box::new(lister.clone()),
+                channel_lister: Box::new(lister),
                 shutdown_tx,
             })
         })
     }
-
-    fn fetch(
-        &self,
-    ) -> BoxFuture<'_, Result<(Vec<Channel>, Vec<User>), Box<dyn Error + Send + Sync>>> {
-        let channels = self.channels.clone();
-        let users = self.users.clone();
-        Box::pin(async move { Ok((channels, users)) })
-    }
 }
 
 struct FakeSender {
-    captured_tx: mpsc::UnboundedSender<(Channel, Message)>,
+    captured_tx: mpsc::UnboundedSender<CoreMessage>,
 }
 
-impl MessageSender for FakeSender {
+impl SendMessage for FakeSender {
     fn send_message<'a>(
         &'a self,
-        target: &'a Channel,
-        message: &'a Message,
+        message: &'a CoreMessage,
     ) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>> {
-        let _ = self.captured_tx.send((target.clone(), message.clone()));
+        let _ = self.captured_tx.send(message.clone());
         Box::pin(async { Ok(()) })
+    }
+}
+
+#[derive(Clone)]
+struct FakeLister {
+    channels: Vec<PlatformChannel>,
+    users: Vec<PlatformUser>,
+}
+
+impl ListUsers for FakeLister {
+    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Box<dyn Error + Send + Sync>>> {
+        let users = self.users.clone();
+        Box::pin(async move { Ok(users) })
+    }
+}
+
+impl ListChannels for FakeLister {
+    fn list_channels(
+        &self,
+    ) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Box<dyn Error + Send + Sync>>> {
+        let channels = self.channels.clone();
+        Box::pin(async move { Ok(channels) })
     }
 }
 
 /// Test-side handle for injecting messages/events and reading captured output
 pub struct FakeControl {
     platform_id: PlatformId,
-    inject_msg_tx: mpsc::Sender<Message>,
+    inject_msg_tx: mpsc::Sender<PlatformMessage>,
     inject_event_tx: mpsc::Sender<MetaEvent>,
-    captured_rx: tokio::sync::Mutex<mpsc::UnboundedReceiver<(Channel, Message)>>,
+    captured_rx: tokio::sync::Mutex<mpsc::UnboundedReceiver<CoreMessage>>,
 }
 
 impl FakeControl {
@@ -122,7 +142,7 @@ impl FakeControl {
         &self.platform_id
     }
 
-    pub async fn inject_message(&self, msg: Message) {
+    pub async fn inject_message(&self, msg: PlatformMessage) {
         self.inject_msg_tx
             .send(msg)
             .await
@@ -137,7 +157,7 @@ impl FakeControl {
     }
 
     /// Wait for the next relayed message, returning `None` on timeout.
-    pub async fn next_message(&self, timeout: Duration) -> Option<(Channel, Message)> {
+    pub async fn next_message(&self, timeout: Duration) -> Option<CoreMessage> {
         let mut rx = self.captured_rx.lock().await;
         tokio::time::timeout(timeout, rx.recv())
             .await
@@ -146,22 +166,22 @@ impl FakeControl {
     }
 }
 
-/// Builder for [`FakePlatform`] when you need to pre-configure `fetch()` data
+/// Builder for [`FakePlatform`] when you need to pre-configure listing data
 pub struct FakePlatformBuilder {
     id: PlatformId,
-    channels: Vec<Channel>,
-    users: Vec<User>,
+    channels: Vec<PlatformChannel>,
+    users: Vec<PlatformUser>,
 }
 
 impl FakePlatformBuilder {
     #[must_use]
-    pub fn with_channels(mut self, channels: Vec<Channel>) -> Self {
+    pub fn with_channels(mut self, channels: Vec<PlatformChannel>) -> Self {
         self.channels = channels;
         self
     }
 
     #[must_use]
-    pub fn with_users(mut self, users: Vec<User>) -> Self {
+    pub fn with_users(mut self, users: Vec<PlatformUser>) -> Self {
         self.users = users;
         self
     }

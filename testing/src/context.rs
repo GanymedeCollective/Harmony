@@ -2,10 +2,8 @@
 
 use std::collections::HashMap;
 
-use bridge::config::UserLink;
-use bridge::fetched_data::FetchedData;
-use bridge::run::BridgeHandle;
-use bridge_core::{Channel, User};
+use bridge_core::run::BridgeHandle;
+use bridge_core::{PlatformChannel, PlatformId, PlatformUser};
 
 use crate::fake_platform::FakePlatform;
 use crate::world::{TestWorld, UserSpec};
@@ -26,23 +24,25 @@ impl TestWorld {
         let mut controls = HashMap::new();
 
         for spec in &self.platforms {
-            let channels: Vec<Channel> = spec
+            let platform_id = PlatformId::new(&spec.name);
+            let channels: Vec<PlatformChannel> = spec
                 .channels
                 .iter()
-                .map(|ch| Channel {
+                .map(|ch| PlatformChannel {
+                    platform: platform_id.clone(),
                     id: ch.clone(),
                     name: ch.clone(),
                 })
                 .collect();
 
-            let users: Vec<User> = self
+            let users: Vec<PlatformUser> = self
                 .users
                 .iter()
                 .filter_map(|u| {
-                    u.identities.get(&spec.name).map(|name| User {
-                        id: Some(name.clone()),
-                        name: name.clone(),
-                        display_name: u.display_name.clone(),
+                    u.identities.get(&spec.name).map(|user_id| PlatformUser {
+                        platform: platform_id.clone(),
+                        id: user_id.clone(),
+                        display_name: u.display_name.clone().or_else(|| Some(user_id.clone())),
                         avatar_url: u.avatar_url.clone(),
                     })
                 })
@@ -57,31 +57,9 @@ impl TestWorld {
             controls.insert(spec.name.clone(), control);
         }
 
-        let channel_links = self
-            .channel_links
-            .iter()
-            .map(|pairs| pairs.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
-            .collect();
-
-        let user_links: Vec<UserLink> = self
-            .users
-            .iter()
-            .map(|u| UserLink {
-                display_name: u.display_name.clone(),
-                avatar_url: u.avatar_url.clone(),
-                identities: u.identities.clone(),
-            })
-            .collect();
-
-        let handle = bridge::run::run(
-            adapters,
-            channel_links,
-            user_links,
-            FetchedData::default(),
-            None,
-        )
-        .await
-        .expect("bridge should start");
+        let handle = bridge_core::run::run(adapters)
+            .await
+            .expect("bridge should start");
 
         let users = self
             .users

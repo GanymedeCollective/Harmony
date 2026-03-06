@@ -1,7 +1,7 @@
 //! Serenity event handler: forwards Discord gateway events as core messages and meta-events.
 
 use async_trait::async_trait;
-use bridge_core::{Message, MetaEvent, PlatformId, User};
+use bridge_core::{MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
 use serenity::all::{
     ChannelType, Context, EventHandler, GuildChannel, GuildId, GuildMemberUpdateEvent, Member,
     Ready, User as SerenityUser,
@@ -10,7 +10,7 @@ use serenity::model::channel::Message as SerenityMessage;
 use tokio::sync::mpsc;
 
 pub struct Handler {
-    pub msg_tx: mpsc::Sender<(PlatformId, Message)>,
+    pub msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
     pub event_tx: mpsc::Sender<MetaEvent>,
     pub platform_id: PlatformId,
     pub bot_user_id: std::sync::OnceLock<u64>,
@@ -32,7 +32,7 @@ impl EventHandler for Handler {
             return;
         }
 
-        let core_msg = crate::convert::discord_to_core(&msg);
+        let core_msg = crate::convert::discord_to_core(&msg, &self.platform_id);
         if self
             .msg_tx
             .send((self.platform_id.clone(), core_msg))
@@ -51,10 +51,14 @@ impl EventHandler for Handler {
             .event_tx
             .send(MetaEvent::UserJoined {
                 platform: self.platform_id.clone(),
-                user: User {
-                    id: Some(new_member.user.id.get().to_string()),
-                    name: new_member.user.name.clone(),
-                    display_name: new_member.nick.clone(),
+                user: PlatformUser {
+                    platform: self.platform_id.clone(),
+                    id: new_member.user.id.get().to_string(),
+                    display_name: new_member
+                        .nick
+                        .clone()
+                        .or_else(|| new_member.user.global_name.clone())
+                        .or_else(|| Some(new_member.user.name.clone())),
                     avatar_url: new_member.user.avatar_url(),
                 },
             })
@@ -94,10 +98,14 @@ impl EventHandler for Handler {
             .event_tx
             .send(MetaEvent::UserUpdated {
                 platform: self.platform_id.clone(),
-                user: User {
-                    id: Some(event.user.id.get().to_string()),
-                    name: event.user.name.clone(),
-                    display_name: event.nick.clone(),
+                user: PlatformUser {
+                    platform: self.platform_id.clone(),
+                    id: event.user.id.get().to_string(),
+                    display_name: event
+                        .nick
+                        .clone()
+                        .or_else(|| event.user.global_name.clone())
+                        .or_else(|| Some(event.user.name.clone())),
                     avatar_url: event.user.avatar_url(),
                 },
             })
@@ -112,8 +120,11 @@ impl EventHandler for Handler {
             .event_tx
             .send(MetaEvent::ChannelCreated {
                 platform: self.platform_id.clone(),
-                id: channel.id.get().to_string(),
-                name: channel.name.clone(),
+                channel: PlatformChannel {
+                    platform: self.platform_id.clone(),
+                    id: channel.id.get().to_string(),
+                    name: channel.name.clone(),
+                },
             })
             .await;
     }
@@ -144,8 +155,11 @@ impl EventHandler for Handler {
             .event_tx
             .send(MetaEvent::ChannelUpdated {
                 platform: self.platform_id.clone(),
-                id: new.id.get().to_string(),
-                name: new.name.clone(),
+                channel: PlatformChannel {
+                    platform: self.platform_id.clone(),
+                    id: new.id.get().to_string(),
+                    name: new.name.clone(),
+                },
             })
             .await;
     }

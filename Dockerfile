@@ -10,7 +10,7 @@ RUN apk add --no-cache openssl openssl-dev openssl-libs-static
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --bin bridge
+RUN cargo build --release
 
 FROM alpine AS runner
 WORKDIR /app

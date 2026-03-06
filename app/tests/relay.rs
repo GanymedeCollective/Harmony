@@ -1,29 +1,21 @@
 //! Integration tests for the message relay loop.
 
-use bridge_testing::{TestWorld, expect, expect_none, send, test_world};
+use bridge_testing::{expect, expect_none, send, test_world};
 
-fn two_platform_world() -> TestWorld {
-    test_world! {
+#[tokio::test]
+async fn message_relayed_between_two_platforms() {
+    let ctx = test_world! {
         platforms {
             alpha: ["#general", "#chat", "#lobby"],
             beta: ["#general", "#chat", "#lobby"],
         }
-        channels {
-            alpha "#general" = beta "#general",
-            alpha "#chat" = beta "#chat",
-            alpha "#lobby" = beta "#lobby",
-        }
     }
-}
-
-#[tokio::test]
-async fn message_relayed_between_two_platforms() {
-    let ctx = two_platform_world().start().await;
+    .start()
+    .await;
 
     send!(ctx, alpha, "alice", "#general", "hello from alpha");
     expect!(ctx, beta, "#general", {
         content == "hello from alpha",
-        author.name == "alice",
     });
 
     ctx.shutdown().await;
@@ -35,10 +27,7 @@ async fn message_not_relayed_to_unlinked_platform() {
         platforms {
             alpha: ["#general"],
             beta: ["#general"],
-            gamma: ["#general"],
-        }
-        channels {
-            alpha "#general" = beta "#general",
+            gamma: ["#unrelated"],
         }
     };
     let ctx = world.start().await;
@@ -52,7 +41,14 @@ async fn message_not_relayed_to_unlinked_platform() {
 
 #[tokio::test]
 async fn bidirectional_relay() {
-    let ctx = two_platform_world().start().await;
+    let ctx = test_world! {
+        platforms {
+            alpha: ["#general", "#chat", "#lobby"],
+            beta: ["#general", "#chat", "#lobby"],
+        }
+    }
+    .start()
+    .await;
 
     send!(ctx, alpha, "alice", "#chat", "alpha->beta");
     expect!(ctx, beta, "#chat", { content == "alpha->beta" });
@@ -70,9 +66,6 @@ async fn three_way_relay() {
             alpha: ["#lobby"],
             beta: ["#lobby"],
             gamma: ["#lobby"],
-        }
-        channels {
-            alpha "#lobby" = beta "#lobby" = gamma "#lobby",
         }
     };
     let ctx = world.start().await;

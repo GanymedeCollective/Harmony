@@ -4,21 +4,12 @@ version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
-[lib]
-name = "bridge"
-path = "src/lib.rs"
-
 [[bin]]
 name = "bridge"
-path = "src/bin/bridge.rs"
-
-[[bin]]
-name = "bridge-fetch"
-path = "src/bin/fetch.rs"
+path = "src/bridge.rs"
 
 [dependencies]
 bridge-core = { path = "../core" }
-bridge-utils = { path = "../utils" }
 bridge-irc = { path = "../irc" }
 bridge-discord = { path = "../discord" }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }

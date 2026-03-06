@@ -1,5 +1,5 @@
 [workspace]
-members = ["core", "utils", "discord", "irc", "app", "testing"]
+members = ["core", "discord", "irc", "app", "testing"]
 resolver = "2"
 
 [workspace.package]

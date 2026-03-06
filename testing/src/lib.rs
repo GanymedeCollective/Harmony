@@ -9,7 +9,9 @@ mod fake_platform;
 mod macros;
 mod world;
 
-pub use bridge_core::{Channel, Message, MetaEvent, User};
+pub use bridge_core::{
+    CoreMessage, MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser,
+};
 pub use context::TestContext;
 pub use fake_platform::{FakeControl, FakePlatform, FakePlatformBuilder};
 pub use world::{PlatformSpec, TestWorld, TestWorldBuilder, UserSpec};
