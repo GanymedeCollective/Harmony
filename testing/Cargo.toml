@@ -1,15 +1,16 @@
 [package]
 name = "bridge-testing"
 version = "0.1.0"
+
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-bridge-core = { path = "../core" }
-bridge = { path = "../app" }
-tokio = { version = "1", features = ["sync", "rt", "time"] }
+bridge.workspace = true
+bridge-core.workspace = true
+
+tokio = { workspace = true, features = ["sync", "rt", "time"] }
 
 # Testing does not require the same level of clippy warnings
 [lints.clippy]
 all = "warn"
-

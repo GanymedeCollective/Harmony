@@ -1,5 +1,5 @@
 [workspace]
-members = ["core", "utils", "discord", "irc", "app", "testing"]
+members = ["app", "core", "discord", "irc", "testing", "utils"]
 resolver = "2"
 
 [workspace.package]
@@ -7,9 +7,32 @@ edition = "2024"
 license = "AGPL-3.0"
 
 [workspace.lints.clippy]
-pedantic = { level = "deny", priority = -1 }
 all = { level = "deny", priority = -1 }
-nursery = { level = "warn", priority = -1 }
 cargo = { level = "warn", priority = -1 }
 cargo_common_metadata = "allow"
 missing_errors_doc = "warn"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+
+[workspace.dependencies]
+# Workspace dependencies
+bridge = { path = "./app" }
+bridge-core = { path = "./core" }
+bridge-discord = { path = "./discord" }
+bridge-irc = { path = "./irc" }
+bridge-testing = { path = "./testing" }
+bridge-utils = { path = "./utils" }
+
+# External dependencies
+anyhow = "1"
+async-trait = "0.1"
+clap = "4.5.60"
+env_logger = "0.11"
+futures = "0.3"
+http = "1"
+irc = "1"
+log = "0.4"
+serde = "1"
+serenity = "0.12"
+tokio = "1"
+toml = "0.9"
