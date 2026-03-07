@@ -1,16 +1,18 @@
 [package]
 name = "bridge-discord"
 version = "0.1.0"
+
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-bridge-core = { path = "../core" }
-log = "0.4"
-serenity = { version = "0.12", default-features = true }
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync"] }
-anyhow = "1"
-async-trait = "0.1"
+bridge-core.workspace = true
+
+anyhow.workspace = true
+async-trait.workspace = true
+log.workspace = true
+serenity.workspace = true
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync"] }
 
 [lints]
 workspace = true
