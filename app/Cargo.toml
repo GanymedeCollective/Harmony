@@ -1,6 +1,7 @@
 [package]
 name = "harmony"
 version = "0.1.0"
+
 edition.workspace = true
 license.workspace = true
 
@@ -9,20 +10,22 @@ name = "harmony"
 path = "src/harmony.rs"
 
 [dependencies]
-harmony-core = { path = "../core" }
-irc-adapter = { path = "../irc" }
-discord-adapter = { path = "../discord" }
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
-serde = { version = "1", features = ["derive"] }
-toml = "0.8"
-log = "0.4"
-env_logger = "0.11"
-anyhow = "1"
-clap = { version = "4.5.60", features = ["derive"] }
+discord-adapter.workspace = true
+harmony-core.workspace = true
+irc-adapter.workspace = true
+
+anyhow.workspace = true
+clap = { workspace = true, features = ["derive"] }
+env_logger.workspace = true
+log.workspace = true
+serde = { workspace = true, features = ["derive"] }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
+toml.workspace = true
 
 [dev-dependencies]
-harmony-testing = { path = "../testing" }
-tokio = { version = "1", features = ["test-util", "macros"] }
+harmony-testing.workspace = true
+
+tokio = { workspace = true, features = ["test-util", "macros"] }
 
 [lints]
 workspace = true
