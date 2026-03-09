@@ -8,13 +8,35 @@ use tokio::sync::{RwLock, mpsc, oneshot};
 use tokio::task::JoinHandle;
 
 use crate::{
-    Channels, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers, MetaEvent,
-    PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage, Users,
+    Channels, CoreChannel, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers,
+    MetaEvent, Peers, PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage,
+    Users,
 };
+
+/// A simple context used for dependency injection across the core part of the bridge.
+pub(crate) struct CoreCtx {
+    pub(crate) channels: Arc<RwLock<Peers<CoreChannel>>>,
+    pub(crate) users: Arc<RwLock<Peers<CoreUser>>>,
+    pub(crate) senders: HashMap<PlatformId, Box<dyn SendMessage>>,
+}
+
+impl CoreCtx {
+    pub(crate) fn new(
+        channels: Arc<RwLock<Peers<CoreChannel>>>,
+        users: Arc<RwLock<Peers<CoreUser>>>,
+        senders: HashMap<PlatformId, Box<dyn SendMessage>>,
+    ) -> Self {
+        Self {
+            channels,
+            users,
+            senders,
+        }
+    }
+}
 
 pub struct BridgeHandle {
     task: JoinHandle<()>,
-    shutdown_txs: Vec<(String, oneshot::Sender<()>)>,
+    shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)>,
 }
 
 impl BridgeHandle {
@@ -43,10 +65,10 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
         mpsc::channel::<(PlatformId, PlatformMessage)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
 
-    let mut senders: HashMap<String, Box<dyn SendMessage>> = HashMap::new();
+    let mut senders: HashMap<PlatformId, Box<dyn SendMessage>> = HashMap::new();
     let mut user_listers: Vec<(PlatformId, Box<dyn ListUsers>)> = Vec::new();
     let mut channel_listers: Vec<(PlatformId, Box<dyn ListChannels>)> = Vec::new();
-    let mut shutdown_txs: Vec<(String, oneshot::Sender<()>)> = Vec::new();
+    let mut shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)> = Vec::new();
 
     let start_futures: Vec<_> = adapters
         .into_iter()
@@ -68,11 +90,10 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     let results = futures::future::join_all(start_futures).await;
     for result in results {
         let handle = result?;
-        let id_str = handle.id.to_string();
-        senders.insert(id_str.clone(), handle.sender);
+        senders.insert(handle.id.clone(), handle.sender);
         user_listers.push((handle.id.clone(), handle.user_lister));
         channel_listers.push((handle.id.clone(), handle.channel_lister));
-        shutdown_txs.push((id_str, handle.shutdown_tx));
+        shutdown_txs.push((handle.id, handle.shutdown_tx));
     }
 
     drop(msg_tx);
@@ -88,50 +109,16 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
 
     let channels = Arc::new(RwLock::new(channels));
     let users = Arc::new(RwLock::new(users));
+    let ctx = Arc::new(CoreCtx::new(channels, users, senders));
 
     let task = tokio::spawn(async move {
         loop {
             tokio::select! {
                 Some((source_id, msg)) = msg_rx.recv() => {
-                    let core_channel = {
-                        let ch = channels.read().await;
-                        ch.find(&source_id, &msg.channel.id).cloned()
-                    };
-
-                    let Some(core_channel) = core_channel else {
-                        log::debug!(
-                            "{source_id}: no route for channel {}",
-                            msg.channel.id
-                        );
-                        continue;
-                    };
-
-                    let core_author = {
-                        let mut u = users.write().await;
-                        resolve_or_register(&mut u, &source_id, &msg.author)
-                    };
-
-                    let core_msg = CoreMessage {
-                        author: core_author,
-                        channel: core_channel.clone(),
-                        content: msg.content.clone(),
-                    };
-
-                    for platform in core_channel.alias.keys() {
-                        if *platform == source_id {
-                            continue;
-                        }
-                        if let Some(sender) = senders.get::<str>(platform)
-                            && let Err(e) = sender.send_message(&core_msg).await
-                        {
-                            log::error!(
-                                "{source_id} -> {platform}: relay failed: {e}",
-                            );
-                        }
-                    }
+                    dispatch(ctx.clone(), &source_id, msg).await;
                 }
                 Some(event) = event_rx.recv() => {
-                    handle_event(&users, &channels, &event).await;
+                    handle_event(ctx.clone(), &event).await;
                 }
                 else => break,
             }
@@ -139,6 +126,41 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     });
 
     Ok(BridgeHandle { task, shutdown_txs })
+}
+
+/// Dispatches a platform message to all the registered platforms.
+async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessage) {
+    let core_channel = {
+        let ch = ctx.channels.read().await;
+        ch.find(source_id, &msg.channel.id).cloned()
+    };
+
+    let Some(core_channel) = core_channel else {
+        log::debug!("{source_id}: no route for channel {}", msg.channel.id);
+        return;
+    };
+
+    let core_author = {
+        let mut u = ctx.users.write().await;
+        resolve_or_register(&mut u, source_id, &msg.author)
+    };
+
+    let core_msg = CoreMessage {
+        author: core_author,
+        channel: core_channel.clone(),
+        content: msg.content.clone(),
+    };
+
+    for platform in core_channel.alias.keys() {
+        if platform == source_id {
+            continue;
+        }
+        if let Some(sender) = ctx.senders.get(platform)
+            && let Err(e) = sender.send_message(&core_msg).await
+        {
+            log::error!("{source_id} -> {platform}: relay failed: {e}");
+        }
+    }
 }
 
 /// Query all adapters for their channels/users, then build the collections.
@@ -193,7 +215,9 @@ fn resolve_or_register(
 }
 
 /// Handle a runtime event by directly updating the in-memory collections.
-async fn handle_event(users: &RwLock<Users>, channels: &RwLock<Channels>, event: &MetaEvent) {
+async fn handle_event(ctx: Arc<CoreCtx>, event: &MetaEvent) {
+    let users = ctx.users.clone();
+    let channels = ctx.channels.clone();
     match event {
         MetaEvent::UserJoined { user, .. } | MetaEvent::UserUpdated { user, .. } => {
             users.write().await.upsert(user.clone());
