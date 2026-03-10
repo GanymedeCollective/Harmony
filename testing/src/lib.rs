@@ -1,4 +1,4 @@
-//! Test doubles and DSL for integration testing the bridge.
+//! Test doubles and DSL for integration testing Harmony.
 //!
 //! Define a reusable [`TestWorld`] with [`test_world!`], instantiate it per test
 //! with [`TestWorld::start()`](TestWorld::start), then script scenarios with
@@ -9,7 +9,7 @@ mod fake_platform;
 mod macros;
 mod world;
 
-pub use bridge_core::{
+pub use harmony_core::{
     CoreMessage, MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser,
 };
 pub use context::TestContext;

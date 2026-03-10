@@ -14,6 +14,6 @@ RUN cargo build --release
 
 FROM alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/target/release/bridge /usr/local/bin/bridge
+COPY --from=builder /app/target/release/harmony /usr/local/bin/harmony
 
-ENTRYPOINT ["/usr/local/bin/bridge"]
+ENTRYPOINT ["/usr/local/bin/harmony"]

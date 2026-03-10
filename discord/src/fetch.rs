@@ -1,7 +1,7 @@
 //! Queries Discord guilds for text channels and members.
 
 use anyhow::Result;
-use bridge_core::{PlatformChannel, PlatformId, PlatformUser};
+use harmony_core::{PlatformChannel, PlatformId, PlatformUser};
 use serenity::all::ChannelType;
 
 pub async fn fetch_guild_data(

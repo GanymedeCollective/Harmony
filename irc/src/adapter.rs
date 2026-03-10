@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 use std::time::Duration;
 
-use bridge_core::{
+use harmony_core::{
     BoxFuture, MetaEvent, PlatformAdapter, PlatformChannel, PlatformHandle, PlatformId,
     PlatformMessage, PlatformUser,
 };
@@ -73,7 +73,7 @@ impl PlatformAdapter for IrcAdapter {
                 tokio::select! {
                     () = process_stream(stream, msg_tx, event_tx, pid, bn) => {}
                     _ = shutdown_rx => {
-                        let _ = raw_sender.send(Command::QUIT(Some("Bridge shutting down".to_owned())));
+                        let _ = raw_sender.send(Command::QUIT(Some("Harmony shutting down".to_owned())));
                     }
                 }
             });

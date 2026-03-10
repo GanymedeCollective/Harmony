@@ -1,4 +1,4 @@
-//! Bridge lifecycle: start adapters, discover data, relay messages, handle events.
+//! Lifecycle: start adapters, discover data, relay messages, handle events.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -13,7 +13,7 @@ use crate::{
     Users,
 };
 
-/// A simple context used for dependency injection across the core part of the bridge.
+/// A simple context used for dependency injection across the core part.
 pub(crate) struct CoreCtx {
     pub(crate) channels: Arc<RwLock<Peers<CoreChannel>>>,
     pub(crate) users: Arc<RwLock<Peers<CoreUser>>>,
@@ -34,12 +34,12 @@ impl CoreCtx {
     }
 }
 
-pub struct BridgeHandle {
+pub struct HarmonyHandle {
     task: JoinHandle<()>,
     shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)>,
 }
 
-impl BridgeHandle {
+impl HarmonyHandle {
     pub async fn shutdown(self) {
         for (name, tx) in self.shutdown_txs {
             log::info!("stopping {name}...");
@@ -55,12 +55,12 @@ impl BridgeHandle {
 
 /// Start all adapters, discover users/channels, and spawn the relay loop.
 ///
-/// Returns a [`BridgeHandle`] that can shut everything down.
+/// Returns a [`HarmonyHandle`] that can shut everything down.
 ///
 /// # Errors
 ///
 /// Returns an error if any adapter fails to start.
-pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle> {
+pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<HarmonyHandle> {
     let (msg_tx, mut msg_rx) =
         mpsc::channel::<(PlatformId, PlatformMessage)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
@@ -102,7 +102,7 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     let (channels, users) = discover_and_build(&channel_listers, &user_listers).await;
 
     log::info!(
-        "bridge ready: {} channel bridge(s), {} user group(s)",
+        "Harmony ready: {} channel bridge(s), {} user group(s)",
         channels.len(),
         users.len(),
     );
@@ -125,7 +125,7 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
         }
     });
 
-    Ok(BridgeHandle { task, shutdown_txs })
+    Ok(HarmonyHandle { task, shutdown_txs })
 }
 
 /// Dispatches a platform message to all the registered platforms.

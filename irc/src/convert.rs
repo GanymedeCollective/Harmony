@@ -1,6 +1,6 @@
 //! Converts IRC protocol messages to core types.
 
-use bridge_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
+use harmony_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
 use irc::proto::Command;
 
 pub fn irc_to_core(msg: &irc::proto::Message, platform_id: &PlatformId) -> Option<PlatformMessage> {

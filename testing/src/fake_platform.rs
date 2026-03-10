@@ -6,7 +6,7 @@
 use std::error::Error;
 use std::time::Duration;
 
-use bridge_core::{
+use harmony_core::{
     BoxFuture, CoreMessage, ListChannels, ListUsers, MetaEvent, PlatformAdapter, PlatformChannel,
     PlatformHandle, PlatformId, PlatformMessage, PlatformUser, SendMessage,
 };

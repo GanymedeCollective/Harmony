@@ -1,15 +1,15 @@
 [package]
-name = "bridge"
+name = "harmony"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "bridge"
-path = "src/bridge.rs"
+name = "harmony"
+path = "src/harmony.rs"
 
 [dependencies]
-bridge-core = { path = "../core" }
+harmony-core = { path = "../core" }
 bridge-irc = { path = "../irc" }
 bridge-discord = { path = "../discord" }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
@@ -21,7 +21,7 @@ anyhow = "1"
 clap = { version = "4.5.60", features = ["derive"] }
 
 [dev-dependencies]
-bridge-testing = { path = "../testing" }
+harmony-testing = { path = "../testing" }
 tokio = { version = "1", features = ["test-util", "macros"] }
 
 [lints]
