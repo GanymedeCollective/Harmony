@@ -66,8 +66,8 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
 
     let mut senders: HashMap<PlatformId, Box<dyn SendMessage>> = HashMap::new();
-    let mut user_listers: Vec<(PlatformId, Box<dyn ListUsers>)> = Vec::new();
-    let mut channel_listers: Vec<(PlatformId, Box<dyn ListChannels>)> = Vec::new();
+    let mut user_listers: HashMap<PlatformId, Box<dyn ListUsers>> = HashMap::new();
+    let mut channel_listers: HashMap<PlatformId, Box<dyn ListChannels>> = HashMap::new();
     let mut shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)> = Vec::new();
 
     let start_futures: Vec<_> = adapters
@@ -91,8 +91,8 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     for result in results {
         let handle = result?;
         senders.insert(handle.id.clone(), handle.sender);
-        user_listers.push((handle.id.clone(), handle.user_lister));
-        channel_listers.push((handle.id.clone(), handle.channel_lister));
+        user_listers.insert(handle.id.clone(), handle.user_lister);
+        channel_listers.insert(handle.id.clone(), handle.channel_lister);
         shutdown_txs.push((handle.id, handle.shutdown_tx));
     }
 
@@ -165,8 +165,8 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
 
 /// Query all adapters for their channels/users, then build the collections.
 async fn discover_and_build(
-    channel_listers: &[(PlatformId, Box<dyn ListChannels>)],
-    user_listers: &[(PlatformId, Box<dyn ListUsers>)],
+    channel_listers: &HashMap<PlatformId, Box<dyn ListChannels>>,
+    user_listers: &HashMap<PlatformId, Box<dyn ListUsers>>,
 ) -> (Channels, Users) {
     let mut discovered_channels = Vec::new();
     for (pid, lister) in channel_listers {
