@@ -161,7 +161,12 @@ impl<T: Peered> Peers<T> {
         }
     }
 
-    pub(crate) fn update_match_key(&mut self, old_key: Option<&str>, new_key: Option<String>, idx: usize) {
+    pub(crate) fn update_match_key(
+        &mut self,
+        old_key: Option<&str>,
+        new_key: Option<String>,
+        idx: usize,
+    ) {
         if let Some(old) = old_key
             && self.match_index.get(old) == Some(&idx)
         {
@@ -284,8 +289,7 @@ mod tests {
     fn detach_one_alias_keeps_entity() {
         let mut peers: Peers<TestPeer> = Peers::new();
         let mut core = TestPeer::from_single_alias(pid("a"), item("a", "1", "alice"));
-        core.aliases_mut()
-            .insert(pid("b"), item("b", "2", "alice"));
+        core.aliases_mut().insert(pid("b"), item("b", "2", "alice"));
         peers.insert(core);
 
         peers.detach(&pid("a"), "1");
@@ -316,8 +320,7 @@ mod tests {
     fn detach_no_stale_index() {
         let mut peers: Peers<TestPeer> = Peers::new();
         let mut core = TestPeer::from_single_alias(pid("a"), item("a", "1", "alice"));
-        core.aliases_mut()
-            .insert(pid("b"), item("b", "2", "alice"));
+        core.aliases_mut().insert(pid("b"), item("b", "2", "alice"));
         peers.insert(core);
 
         peers.detach(&pid("a"), "1");
