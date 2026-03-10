@@ -31,10 +31,7 @@ impl Users {
         self.reindex(&old_key, new_key);
 
         if let Some(core_user) = self.item_mut(idx) {
-            let old_match = core_user
-                .alias
-                .get(platform)
-                .and_then(CoreUser::match_key);
+            let old_match = core_user.alias.get(platform).and_then(CoreUser::match_key);
 
             let old_avatar = core_user
                 .alias

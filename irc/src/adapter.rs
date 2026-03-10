@@ -97,13 +97,15 @@ async fn discover_and_join(
     platform_id: &PlatformId,
     bot_nickname: &str,
 ) -> (Vec<PlatformChannel>, Vec<PlatformUser>) {
+    const DISCOVERY_TIMEOUT_S: Duration = Duration::from_secs(10);
+
     let mut channels: Vec<PlatformChannel> = Vec::new();
     let mut nicknames: HashSet<String> = HashSet::new();
     let sentinel = "harmony-discovery";
 
     log::info!("irc: waiting for registration...");
 
-    let result = tokio::time::timeout(Duration::from_mins(1), async {
+    let result = tokio::time::timeout(DISCOVERY_TIMEOUT_S, async {
         while let Some(result) = stream.next().await {
             let msg = match result {
                 Ok(msg) => msg,
@@ -162,7 +164,10 @@ async fn discover_and_join(
     .await;
 
     if result.is_err() {
-        log::warn!("irc: discovery timed out after 60s");
+        log::warn!(
+            "irc: discovery timed out after {}s",
+            DISCOVERY_TIMEOUT_S.as_secs()
+        );
     }
 
     let mut users: Vec<PlatformUser> = nicknames
