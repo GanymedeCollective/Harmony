@@ -99,8 +99,7 @@ async fn discover_and_join(
 ) -> (Vec<PlatformChannel>, Vec<PlatformUser>) {
     let mut channels: Vec<PlatformChannel> = Vec::new();
     let mut nicknames: HashSet<String> = HashSet::new();
-    let mut joining = false;
-    let mut names_pending: usize = 0;
+    let sentinel = "harmony-discovery";
 
     log::info!("irc: waiting for registration...");
 
@@ -132,20 +131,18 @@ async fn discover_and_join(
                     }
                 }
                 Command::Response(Response::RPL_LISTEND, _) => {
-                    names_pending = channels.len();
                     log::info!("irc: found {} channel(s), joining all...", channels.len());
                     for ch in &channels {
                         if let Err(e) = raw.send(Command::JOIN(ch.name.clone(), None, None)) {
                             log::error!("irc: failed to join {}: {e}", ch.name);
-                            names_pending = names_pending.saturating_sub(1);
                         }
                     }
-                    joining = true;
-                    if names_pending == 0 {
+                    if let Err(e) = raw.send(Command::PING(sentinel.to_owned(), None)) {
+                        log::error!("irc: failed to send sentinel PING: {e}");
                         break;
                     }
                 }
-                Command::Response(Response::RPL_NAMREPLY, args) if joining => {
+                Command::Response(Response::RPL_NAMREPLY, args) => {
                     if let Some(names_str) = args.last() {
                         for raw_nick in names_str.split_whitespace() {
                             let nick = raw_nick.trim_start_matches(['@', '+', '%', '~', '&']);
@@ -155,11 +152,8 @@ async fn discover_and_join(
                         }
                     }
                 }
-                Command::Response(Response::RPL_ENDOFNAMES, _) if joining => {
-                    names_pending = names_pending.saturating_sub(1);
-                    if names_pending == 0 {
-                        break;
-                    }
+                Command::PONG(_, Some(token)) if token == sentinel => {
+                    break;
                 }
                 _ => {}
             }
