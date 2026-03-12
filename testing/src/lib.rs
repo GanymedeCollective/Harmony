@@ -9,9 +9,22 @@ mod fake_platform;
 mod macros;
 mod world;
 
+pub use harmony_core::{
+    CoreMessage, CoreMessageSegment, MetaEvent, PlatformChannel, PlatformId, PlatformMessage,
+    PlatformMessageSegment, PlatformUser,
+};
+
+/// Render a [`CoreMessageRope`] as a plain string, formatting mentions as `@name`.
+pub fn rope_to_text(rope: &[CoreMessageSegment]) -> String {
+    rope.iter()
+        .map(|seg| match seg {
+            CoreMessageSegment::Text(t) => t.clone(),
+            CoreMessageSegment::Mention(u) => {
+                format!("@{}", u.display_name().unwrap_or("unknown"))
+            }
+        })
+        .collect()
+}
 pub use context::TestContext;
 pub use fake_platform::{FakeControl, FakePlatform, FakePlatformBuilder};
-pub use harmony_core::{
-    CoreMessage, MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser,
-};
 pub use world::{PlatformSpec, TestWorld, TestWorldBuilder, UserSpec};

@@ -1,12 +1,13 @@
 //! Sends bridged messages via per-channel webhooks, and implements listing capabilities.
 
 use std::collections::HashMap;
+use std::fmt::Write as _;
 use std::sync::Arc;
 
 use exn::{Exn, OptionExt as _, ResultExt as _};
 use harmony_core::{
-    BoxFuture, CoreMessage, HarmonyError, ListChannels, ListUsers, PlatformChannel, PlatformId,
-    PlatformUser, SendMessage,
+    BoxFuture, CoreMessage, CoreMessageSegment, HarmonyError, ListChannels, ListUsers,
+    PlatformChannel, PlatformId, PlatformUser, SendMessage,
 };
 use serenity::builder::{CreateWebhook, ExecuteWebhook};
 use serenity::model::id::ChannelId;
@@ -74,6 +75,28 @@ impl DiscordSender {
     }
 }
 
+fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> String {
+    let mut result = String::new();
+
+    for segment in &message.content {
+        match segment {
+            CoreMessageSegment::Text(text) => {
+                result.push_str(text);
+            }
+            CoreMessageSegment::Mention(core_user) => {
+                if let Some(pu) = core_user.get_platform_user(platform_id) {
+                    let _ = write!(result, "<@{}>", pu.id);
+                } else {
+                    let name = core_user.display_name().unwrap_or("unknown");
+                    let _ = write!(result, "@{name}");
+                }
+            }
+        }
+    }
+
+    result
+}
+
 impl SendMessage for DiscordSender {
     fn send_message<'a>(
         &'a self,
@@ -106,7 +129,7 @@ impl SendMessage for DiscordSender {
                 .or_else(|| message.author.avatar_url());
 
             let mut exec = ExecuteWebhook::new()
-                .content(&message.content)
+                .content(format_message_from_core(&self.platform_id, message))
                 .username(display_name);
             if let Some(url) = avatar_url {
                 exec = exec.avatar_url(url);

@@ -1,7 +1,35 @@
 //! Converts Serenity messages to core types.
 
-use harmony_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
+use harmony_core::{
+    PlatformChannel, PlatformId, PlatformMessage, PlatformMessageRope, PlatformMessageSegment,
+    PlatformUser,
+};
 use serenity::model::channel::Message as SerenityMessage;
+
+fn parse_message(text: &str) -> PlatformMessageRope {
+    let mention_candidates: Vec<usize> = text.match_indices("<@").map(|m| m.0).collect();
+    let mut cursor = 0;
+    let mut rope = PlatformMessageRope::new();
+
+    for mention_start in mention_candidates {
+        let text_part = &text[cursor..mention_start];
+        rope.push(PlatformMessageSegment::Text(text_part.to_string()));
+
+        let mention_end = text[mention_start..]
+            .find('>')
+            .map_or(text.len(), |i| mention_start + i + 1);
+
+        let user_id = text[mention_start + 2..mention_end.min(text.len())].trim_end_matches('>');
+        rope.push(PlatformMessageSegment::Mention(user_id.to_string()));
+        cursor = mention_end;
+    }
+
+    if cursor < text.len() {
+        rope.push(PlatformMessageSegment::Text(text[cursor..].to_string()));
+    }
+
+    rope
+}
 
 pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> PlatformMessage {
     let mut content = msg.content.clone();
@@ -31,6 +59,6 @@ pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> Platf
             id: msg.channel_id.get().to_string(),
             name: msg.channel_id.get().to_string(),
         },
-        content,
+        content: parse_message(&content),
     }
 }

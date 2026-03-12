@@ -13,9 +13,9 @@ use crate::error::HarmonyError;
 const MAX_SEND_RETRIES: u32 = 3;
 const RETRY_BACKOFF: Duration = Duration::from_millis(200);
 use crate::{
-    Channels, CoreChannel, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers,
-    MetaEvent, Peers, PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage,
-    Users,
+    Channels, CoreChannel, CoreMessage, CoreMessageRope, CoreMessageSegment, CoreUser,
+    DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers, MetaEvent, Peers, PlatformAdapter, PlatformId,
+    PlatformMessage, PlatformMessageRope, PlatformMessageSegment, PlatformUser, SendMessage, Users,
 };
 
 /// A simple context used for dependency injection across core.
@@ -134,6 +134,44 @@ pub async fn run(
     Ok(AdapterHandle { task, shutdown_txs })
 }
 
+async fn platform_to_core_segment(
+    ctx: &CoreCtx,
+    source_id: &PlatformId,
+    segment: &PlatformMessageSegment,
+) -> CoreMessageSegment {
+    match segment {
+        PlatformMessageSegment::Text(text) => CoreMessageSegment::Text(text.clone()),
+        PlatformMessageSegment::Mention(id) => {
+            let mentioned_user = {
+                let users = ctx.users.read().await;
+                users.find(source_id, id).cloned()
+            };
+
+            mentioned_user.map_or_else(
+                || {
+                    log::warn!("unresolved mention '{id}' on {source_id} -> falling back to text");
+                    CoreMessageSegment::Text(format!("@{id}"))
+                },
+                CoreMessageSegment::Mention,
+            )
+        }
+    }
+}
+
+async fn platform_to_core_message(
+    ctx: &CoreCtx,
+    source_id: &PlatformId,
+    msg: PlatformMessageRope,
+) -> CoreMessageRope {
+    let mut core_msg = CoreMessageRope::new();
+
+    for segment in &msg {
+        core_msg.push(platform_to_core_segment(ctx, source_id, segment).await);
+    }
+
+    core_msg
+}
+
 /// Dispatches a platform message to all the registered platforms.
 async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessage) {
     let core_channel = {
@@ -154,7 +192,7 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
     let core_msg = CoreMessage {
         author: core_author,
         channel: core_channel.clone(),
-        content: msg.content.clone(),
+        content: platform_to_core_message(&ctx, source_id, msg.content).await,
     };
 
     for platform in core_channel.alias.keys() {
