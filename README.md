@@ -31,7 +31,7 @@ nickname = "HARMONY"
 token = "your-bot-token"
 ```
 
-At startup the harmony connects to each platform, discovers channels and users
+At startup, Harmony connects to each platform, discovers channels and users
 automatically, and links them by name. IRC channels are discovered via `LIST`
 and joined; Discord channels come from the bot's guild. No manual channel or
 user mapping is needed.

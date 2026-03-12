@@ -11,14 +11,17 @@ use args::Args;
 use harmony_core::PlatformAdapter;
 use clap::Parser;
 
+use irc_adapter::IrcAdapter;
+use discord_adapter::DiscordAdapter;
+
 #[must_use]
 fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
     vec![
-        Box::new(bridge_irc::IrcAdapter::new(
+        Box::new(IrcAdapter::new(
             cfg.irc.to_irc_config(),
             cfg.irc.nickname.clone(),
         )),
-        Box::new(bridge_discord::DiscordAdapter::new(
+        Box::new(DiscordAdapter::new(
             cfg.discord.token.clone(),
         )),
     ]

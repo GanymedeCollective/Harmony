@@ -13,7 +13,7 @@ use crate::{
     Users,
 };
 
-/// A simple context used for dependency injection across the core part.
+/// A simple context used for dependency injection across core.
 pub(crate) struct CoreCtx {
     pub(crate) channels: Arc<RwLock<Peers<CoreChannel>>>,
     pub(crate) users: Arc<RwLock<Peers<CoreUser>>>,
@@ -34,12 +34,12 @@ impl CoreCtx {
     }
 }
 
-pub struct HarmonyHandle {
+pub struct AdapterHandle {
     task: JoinHandle<()>,
     shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)>,
 }
 
-impl HarmonyHandle {
+impl AdapterHandle {
     pub async fn shutdown(self) {
         for (name, tx) in self.shutdown_txs {
             log::info!("stopping {name}...");
@@ -60,7 +60,7 @@ impl HarmonyHandle {
 /// # Errors
 ///
 /// Returns an error if any adapter fails to start.
-pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<HarmonyHandle> {
+pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<AdapterHandle> {
     let (msg_tx, mut msg_rx) =
         mpsc::channel::<(PlatformId, PlatformMessage)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
@@ -125,7 +125,7 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<HarmonyHandl
         }
     });
 
-    Ok(HarmonyHandle { task, shutdown_txs })
+    Ok(AdapterHandle { task, shutdown_txs })
 }
 
 /// Dispatches a platform message to all the registered platforms.

@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use harmony_core::run::HarmonyHandle;
+use harmony_core::run::AdapterHandle;
 use harmony_core::{PlatformChannel, PlatformId, PlatformUser};
 
 use crate::fake_platform::FakePlatform;
@@ -13,7 +13,7 @@ pub use crate::fake_platform::FakeControl;
 pub struct TestContext {
     controls: HashMap<String, FakeControl>,
     users: HashMap<String, UserSpec>,
-    handle: HarmonyHandle,
+    handle: AdapterHandle,
 }
 
 impl TestWorld {

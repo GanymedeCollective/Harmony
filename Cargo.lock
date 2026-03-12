@@ -136,29 +136,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bridge-discord"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "harmony-core",
- "log",
- "serenity",
- "tokio",
-]
-
-[[package]]
-name = "bridge-irc"
-version = "0.1.0"
-dependencies = [
- "futures",
- "harmony-core",
- "irc",
- "log",
- "tokio",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -401,6 +378,18 @@ checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
  "block-buffer",
  "crypto-common",
+]
+
+[[package]]
+name = "discord-adapter"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "harmony-core",
+ "log",
+ "serenity",
+ "tokio",
 ]
 
 [[package]]
@@ -727,12 +716,12 @@ name = "harmony"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "bridge-discord",
- "bridge-irc",
  "clap",
+ "discord-adapter",
  "env_logger",
  "harmony-core",
  "harmony-testing",
+ "irc-adapter",
  "log",
  "serde",
  "tokio",
@@ -1056,6 +1045,17 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "toml 0.7.8",
+]
+
+[[package]]
+name = "irc-adapter"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "harmony-core",
+ "irc",
+ "log",
+ "tokio",
 ]
 
 [[package]]
