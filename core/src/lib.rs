@@ -1,4 +1,4 @@
-//! Platform-agnostic types and traits to use as base for bridges.
+//! Platform-agnostic types and traits to use as a base for adapters.
 
 mod adapter;
 pub mod capabilities;

@@ -55,7 +55,7 @@ impl AdapterHandle {
 
 /// Start all adapters, discover users/channels, and spawn the relay loop.
 ///
-/// Returns a [`HarmonyHandle`] that can shut everything down.
+/// Returns a [`AdapterHandle`] that can shut everything down.
 ///
 /// # Errors
 ///
