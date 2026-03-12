@@ -57,6 +57,11 @@ impl<T: Peered> Peers<T> {
     pub fn build(discovered: &[(PlatformId, Vec<T::Platform>)]) -> Self {
         let mut peers = Self::new();
         peers.auto_correlate(discovered);
+        for (_pid, items) in discovered {
+            for item in items {
+                peers.upsert(item.clone());
+            }
+        }
         peers
     }
 
