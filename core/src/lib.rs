@@ -18,7 +18,10 @@ pub use error::HarmonyError;
 pub use event::MetaEvent;
 pub use exn::Exn;
 pub use futures::future::BoxFuture;
-pub use messages::{CoreMessage, PlatformMessage};
+pub use messages::{
+    CoreMessage, CoreMessageRope, CoreMessageSegment, PlatformMessage, PlatformMessageRope,
+    PlatformMessageSegment,
+};
 pub use peers::{Peered, Peers};
 pub use platform::PlatformId;
 pub use users::{CoreUser, PlatformUser, Users};

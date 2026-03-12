@@ -6,5 +6,15 @@ use crate::CoreUser;
 pub struct CoreMessage {
     pub author: CoreUser,
     pub channel: CoreChannel,
-    pub content: String,
+    pub content: CoreMessageRope,
 }
+
+/// A segment of a message rope.
+#[derive(Debug, Clone)]
+pub enum CoreMessageSegment {
+    Text(String),
+    Mention(CoreUser),
+}
+
+/// A rope of message segments.
+pub type CoreMessageRope = Vec<CoreMessageSegment>;
