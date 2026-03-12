@@ -1,11 +1,11 @@
 [package]
-name = "bridge-irc"
+name = "irc-adapter"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-bridge-core = { path = "../core" }
+harmony-core = { path = "../core" }
 log = "0.4"
 irc = "1"
 futures = "0.3"

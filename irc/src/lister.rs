@@ -1,6 +1,6 @@
 //! Cached channel/user lists discovered during IRC startup.
 
-use bridge_core::{BoxFuture, ListChannels, ListUsers, PlatformChannel, PlatformUser};
+use harmony_core::{BoxFuture, ListChannels, ListUsers, PlatformChannel, PlatformUser};
 
 #[derive(Clone)]
 pub struct IrcLister {

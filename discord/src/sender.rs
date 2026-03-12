@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use bridge_core::{
+use harmony_core::{
     BoxFuture, CoreMessage, ListChannels, ListUsers, PlatformChannel, PlatformId, PlatformUser,
     SendMessage,
 };

@@ -1,6 +1,6 @@
 //! Sends bridged messages as IRC PRIVMSG.
 
-use bridge_core::{BoxFuture, CoreMessage, PlatformId, SendMessage};
+use harmony_core::{BoxFuture, CoreMessage, PlatformId, SendMessage};
 use irc::client as irc_client;
 
 #[derive(Clone)]

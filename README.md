@@ -1,4 +1,4 @@
-Bridge
+Harmony
 ======
 
 Relays messages between chat servers. Channels are auto-matched by name across
@@ -9,10 +9,10 @@ Usage
 -----
 
 ```
-bridge                        # run the bridge
-bridge -c path/to/config.toml # custom config (defaults to runtime/config.toml or $BRIDGE_RUNTIME_DIR)
-bridge -v/-vv                 # debug / trace logging
-bridge --log-path bridge.log  # log to file instead of stderr
+harmony                        # run Harmony
+harmony -c path/to/config.toml # custom config (defaults to runtime/config.toml or $HARMONY_RUNTIME_DIR)
+harmony -v/-vv                 # debug / trace logging
+harmony --log-path harmony.log  # log to file instead of stderr
 ```
 
 Config
@@ -25,13 +25,13 @@ Lives in `runtime/config.toml`. Just platform credentials:
 server = "irc.example.com"
 port = 6697
 use_tls = true
-nickname = "MY-BRIDGE"
+nickname = "HARMONY"
 
 [discord]
 token = "your-bot-token"
 ```
 
-At startup the bridge connects to each platform, discovers channels and users
+At startup, Harmony connects to each platform, discovers channels and users
 automatically, and links them by name. IRC channels are discovered via `LIST`
 and joined; Discord channels come from the bot's guild. No manual channel or
 user mapping is needed.
@@ -66,8 +66,8 @@ Docker
 ------
 
 ```sh
-docker build -t bridge .
-docker run -v /path/to/config.toml:/config.toml -d bridge -c /config.toml
+docker build -t harmony .
+docker run -v /path/to/config.toml:/config.toml -d harmony -c /config.toml
 ```
 
 TODO

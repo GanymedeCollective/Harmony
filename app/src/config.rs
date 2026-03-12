@@ -25,8 +25,8 @@ pub struct IrcConfig {
 
 impl IrcConfig {
     #[must_use]
-    pub fn to_irc_config(&self) -> bridge_irc::IrcConfig {
-        bridge_irc::IrcConfig {
+    pub fn to_irc_config(&self) -> irc_adapter::IrcConfig {
+        irc_adapter::IrcConfig {
             nickname: Some(self.nickname.clone()),
             server: Some(self.server.clone()),
             port: Some(self.port),

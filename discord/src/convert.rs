@@ -1,6 +1,6 @@
 //! Converts Serenity messages to core types.
 
-use bridge_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
+use harmony_core::{PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
 use serenity::model::channel::Message as SerenityMessage;
 
 pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> PlatformMessage {

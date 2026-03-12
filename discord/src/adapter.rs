@@ -1,6 +1,6 @@
 //! Starts a Serenity client, produces a `PlatformHandle`.
 
-use bridge_core::{
+use harmony_core::{
     BoxFuture, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, PlatformMessage,
 };
 use tokio::sync::{mpsc, oneshot};

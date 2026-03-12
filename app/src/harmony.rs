@@ -8,17 +8,20 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use args::Args;
-use bridge_core::PlatformAdapter;
+use harmony_core::PlatformAdapter;
 use clap::Parser;
+
+use irc_adapter::IrcAdapter;
+use discord_adapter::DiscordAdapter;
 
 #[must_use]
 fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
     vec![
-        Box::new(bridge_irc::IrcAdapter::new(
+        Box::new(IrcAdapter::new(
             cfg.irc.to_irc_config(),
             cfg.irc.nickname.clone(),
         )),
-        Box::new(bridge_discord::DiscordAdapter::new(
+        Box::new(DiscordAdapter::new(
             cfg.discord.token.clone(),
         )),
     ]
@@ -30,7 +33,7 @@ async fn main() -> Result<()> {
     logger::init(args.verbose, args.log_path.as_deref());
 
     let runtime_dir = PathBuf::from(
-        std::env::var("BRIDGE_RUNTIME_DIR").unwrap_or_else(|_| "runtime".to_string()),
+        std::env::var("HARMONY_RUNTIME_DIR").unwrap_or_else(|_| "runtime".to_string()),
     );
     let config_path = args
         .config
@@ -41,9 +44,9 @@ async fn main() -> Result<()> {
     let cfg = config::load(&config_path)?;
     let adapters = create_adapters(&cfg);
 
-    let handle = bridge_core::run::run(adapters).await?;
+    let handle = harmony_core::run::run(adapters).await?;
 
-    log::info!("bridge is running, ctrl+c to stop");
+    log::info!("Harmony is running, ctrl+c to stop");
     tokio::signal::ctrl_c().await?;
 
     log::info!("shutting down... (press ctrl+c again to force)");

@@ -1,6 +1,6 @@
 //! Integration tests for the message relay loop.
 
-use bridge_testing::{expect, expect_none, send, test_world};
+use harmony_testing::{expect, expect_none, send, test_world};
 
 #[tokio::test]
 async fn message_relayed_between_two_platforms() {

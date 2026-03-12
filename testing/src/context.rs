@@ -2,8 +2,8 @@
 
 use std::collections::HashMap;
 
-use bridge_core::run::BridgeHandle;
-use bridge_core::{PlatformChannel, PlatformId, PlatformUser};
+use harmony_core::run::AdapterHandle;
+use harmony_core::{PlatformChannel, PlatformId, PlatformUser};
 
 use crate::fake_platform::FakePlatform;
 use crate::world::{TestWorld, UserSpec};
@@ -13,11 +13,11 @@ pub use crate::fake_platform::FakeControl;
 pub struct TestContext {
     controls: HashMap<String, FakeControl>,
     users: HashMap<String, UserSpec>,
-    handle: BridgeHandle,
+    handle: AdapterHandle,
 }
 
 impl TestWorld {
-    /// Instantiate this world into live fake platforms, start the bridge, and
+    /// Instantiate this world into live fake platforms, start harmony, and
     /// return a [`TestContext`] for scripting scenarios.
     pub async fn start(&self) -> TestContext {
         let mut adapters = Vec::new();
@@ -57,9 +57,9 @@ impl TestWorld {
             controls.insert(spec.name.clone(), control);
         }
 
-        let handle = bridge_core::run::run(adapters)
+        let handle = harmony_core::run::run(adapters)
             .await
-            .expect("bridge should start");
+            .expect("Harmony should start");
 
         let users = self
             .users

@@ -136,65 +136,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bridge"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bridge-core",
- "bridge-discord",
- "bridge-irc",
- "bridge-testing",
- "clap",
- "env_logger",
- "log",
- "serde",
- "tokio",
- "toml 0.8.23",
-]
-
-[[package]]
-name = "bridge-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "futures",
- "http",
- "log",
- "tokio",
-]
-
-[[package]]
-name = "bridge-discord"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "bridge-core",
- "log",
- "serenity",
- "tokio",
-]
-
-[[package]]
-name = "bridge-irc"
-version = "0.1.0"
-dependencies = [
- "bridge-core",
- "futures",
- "irc",
- "log",
- "tokio",
-]
-
-[[package]]
-name = "bridge-testing"
-version = "0.1.0"
-dependencies = [
- "bridge-core",
- "tokio",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -437,6 +378,18 @@ checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
  "block-buffer",
  "crypto-common",
+]
+
+[[package]]
+name = "discord-adapter"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "harmony-core",
+ "log",
+ "serenity",
+ "tokio",
 ]
 
 [[package]]
@@ -759,6 +712,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
+name = "harmony"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "discord-adapter",
+ "env_logger",
+ "harmony-core",
+ "harmony-testing",
+ "irc-adapter",
+ "log",
+ "serde",
+ "tokio",
+ "toml 0.8.23",
+]
+
+[[package]]
+name = "harmony-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "http",
+ "log",
+ "tokio",
+]
+
+[[package]]
+name = "harmony-testing"
+version = "0.1.0"
+dependencies = [
+ "harmony-core",
+ "tokio",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1056,6 +1045,17 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "toml 0.7.8",
+]
+
+[[package]]
+name = "irc-adapter"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "harmony-core",
+ "irc",
+ "log",
+ "tokio",
 ]
 
 [[package]]
