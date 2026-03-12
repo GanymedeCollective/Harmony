@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use bridge_core::{
-    BoxFuture, CoreMessage, ListChannels, ListUsers, PlatformChannel, PlatformId, PlatformUser,
-    SendMessage,
+    BoxFuture, CoreMessage, CoreMessageSegment, ListChannels, ListUsers, PlatformChannel,
+    PlatformId, PlatformUser, SendMessage,
 };
 use serenity::builder::{CreateWebhook, ExecuteWebhook};
 use serenity::model::id::ChannelId;
@@ -71,6 +71,25 @@ impl DiscordSender {
     }
 }
 
+fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> String {
+    let mut result = String::new();
+
+    for segment in &message.content {
+        match segment {
+            CoreMessageSegment::Text(text) => {
+                result.push_str(text);
+            }
+            CoreMessageSegment::Mention(core_user) => {
+                // SAFETY: unwrap is safe because a mention to a non-existent platform user is converted to a [`PlatformMessageSegment::Text`]
+                let platform_user = core_user.get_platform_user(platform_id).unwrap();
+                result.push_str(&format!("<@{}>", platform_user.id));
+            }
+        }
+    }
+
+    result
+}
+
 impl SendMessage for DiscordSender {
     fn send_message<'a>(
         &'a self,
@@ -98,7 +117,7 @@ impl SendMessage for DiscordSender {
                 .or_else(|| message.author.avatar_url());
 
             let mut exec = ExecuteWebhook::new()
-                .content(&message.content)
+                .content(format_message_from_core(&self.platform_id, message))
                 .username(display_name);
             if let Some(url) = avatar_url {
                 exec = exec.avatar_url(url);

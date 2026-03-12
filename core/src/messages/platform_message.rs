@@ -6,5 +6,15 @@ use crate::PlatformUser;
 pub struct PlatformMessage {
     pub author: PlatformUser,
     pub channel: PlatformChannel,
-    pub content: String,
+    pub content: PlatformMessageRope,
 }
+
+/// A segment of a message rope.
+#[derive(Debug, Clone)]
+pub enum PlatformMessageSegment {
+    Text(String),
+    Mention(PlatformUser),
+}
+
+/// A rope of message segments.
+pub type PlatformMessageRope = Vec<PlatformMessageSegment>;

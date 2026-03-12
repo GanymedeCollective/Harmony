@@ -8,9 +8,9 @@ use tokio::sync::{RwLock, mpsc, oneshot};
 use tokio::task::JoinHandle;
 
 use crate::{
-    Channels, CoreChannel, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers,
-    MetaEvent, Peers, PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage,
-    Users,
+    Channels, CoreChannel, CoreMessage, CoreMessageRope, CoreMessageSegment, CoreUser,
+    DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers, MetaEvent, Peers, PlatformAdapter, PlatformId,
+    PlatformMessage, PlatformMessageRope, PlatformMessageSegment, PlatformUser, SendMessage, Users,
 };
 
 /// A simple context used for dependency injection across the core part of the bridge.
@@ -128,6 +128,47 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<BridgeHandle
     Ok(BridgeHandle { task, shutdown_txs })
 }
 
+async fn platform_to_core_segment(
+    ctx: &CoreCtx,
+    source_id: &PlatformId,
+    segment: &PlatformMessageSegment,
+) -> CoreMessageSegment {
+    match segment {
+        PlatformMessageSegment::Text(text) => CoreMessageSegment::Text(text.clone()),
+        PlatformMessageSegment::Mention(platform_user) => {
+            let mentionned_user = {
+                let users = ctx.users.read().await;
+                users.find(source_id, &platform_user.id).cloned()
+            };
+
+            match mentionned_user {
+                Some(user) => CoreMessageSegment::Mention(user.clone()),
+                None => {
+                    log::warn!(
+                        "Failed to mention user {} -> falling back to text",
+                        platform_user.id
+                    );
+                    CoreMessageSegment::Text(platform_user.id.clone())
+                }
+            }
+        }
+    }
+}
+
+async fn platform_to_core_message(
+    ctx: &CoreCtx,
+    source_id: &PlatformId,
+    msg: PlatformMessageRope,
+) -> CoreMessageRope {
+    let mut core_msg = CoreMessageRope::new();
+
+    for segment in &msg {
+        core_msg.push(platform_to_core_segment(ctx, source_id, segment).await);
+    }
+
+    core_msg
+}
+
 /// Dispatches a platform message to all the registered platforms.
 async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessage) {
     let core_channel = {
@@ -148,7 +189,7 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
     let core_msg = CoreMessage {
         author: core_author,
         channel: core_channel.clone(),
-        content: msg.content.clone(),
+        content: platform_to_core_message(&ctx, source_id, msg.content).await,
     };
 
     for platform in core_channel.alias.keys() {

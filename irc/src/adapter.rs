@@ -63,7 +63,10 @@ impl PlatformAdapter for IrcAdapter {
             let (channels, users) =
                 discover_and_join(&raw_sender, &mut stream, &platform_id, &bot_nickname).await;
 
-            let lister = IrcLister { channels, users };
+            let lister = IrcLister {
+                channels: channels.clone(),
+                users: users.clone(),
+            };
 
             let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
             let pid = platform_id.clone();
@@ -71,7 +74,7 @@ impl PlatformAdapter for IrcAdapter {
 
             tokio::spawn(async move {
                 tokio::select! {
-                    () = process_stream(stream, msg_tx, event_tx, pid, bn) => {}
+                    () = process_stream(stream, msg_tx, event_tx, pid, bn, users) => {}
                     _ = shutdown_rx => {
                         let _ = raw_sender.send(Command::QUIT(Some("Bridge shutting down".to_owned())));
                     }
@@ -198,6 +201,7 @@ async fn process_stream(
     event_tx: mpsc::Sender<MetaEvent>,
     pid: PlatformId,
     mut bot_nickname: String,
+    users: Vec<PlatformUser>,
 ) {
     while let Some(result) = stream.next().await {
         let msg = match result {
@@ -210,7 +214,7 @@ async fn process_stream(
 
         match &msg.command {
             Command::PRIVMSG(_, _) => {
-                let Some(core_msg) = crate::convert::irc_to_core(&msg, &pid) else {
+                let Some(core_msg) = crate::convert::irc_to_core(&msg, &pid, &users) else {
                     continue;
                 };
                 if core_msg.author.id == bot_nickname {

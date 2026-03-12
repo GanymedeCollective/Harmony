@@ -15,7 +15,10 @@ pub use capabilities::{ListChannels, ListUsers, SendMessage};
 pub use channels::{Channels, CoreChannel, PlatformChannel};
 pub use event::MetaEvent;
 pub use futures::future::BoxFuture;
-pub use messages::{CoreMessage, PlatformMessage};
+pub use messages::{
+    CoreMessage, CoreMessageRope, CoreMessageSegment, PlatformMessage, PlatformMessageRope,
+    PlatformMessageSegment,
+};
 pub use peers::{Peered, Peers};
 pub use platform::PlatformId;
 pub use users::{CoreUser, PlatformUser, Users};
