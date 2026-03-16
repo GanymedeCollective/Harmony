@@ -141,14 +141,13 @@ async fn platform_to_core_segment(
                 users.find(source_id, id).cloned()
             };
 
-            if let Some(user) = mentioned_user {
-                CoreMessageSegment::Mention(user)
-            } else {
-                log::warn!(
-                    "unresolved mention '{id}' on {source_id} -> falling back to text"
-                );
-                CoreMessageSegment::Text(format!("@{id}"))
-            }
+            mentioned_user.map_or_else(
+                || {
+                    log::warn!("unresolved mention '{id}' on {source_id} -> falling back to text");
+                    CoreMessageSegment::Text(format!("@{id}"))
+                },
+                CoreMessageSegment::Mention,
+            )
         }
     }
 }

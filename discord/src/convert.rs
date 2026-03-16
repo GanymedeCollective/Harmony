@@ -19,8 +19,7 @@ fn parse_message(text: &str) -> PlatformMessageRope {
             .find('>')
             .map_or(text.len(), |i| mention_start + i + 1);
 
-        let user_id = text[mention_start + 2..mention_end.min(text.len())]
-            .trim_end_matches('>');
+        let user_id = text[mention_start + 2..mention_end.min(text.len())].trim_end_matches('>');
         rope.push(PlatformMessageSegment::Mention(user_id.to_string()));
         cursor = mention_end;
     }

@@ -35,10 +35,7 @@ fn parse_message(text: &str) -> PlatformMessageRope {
     rope
 }
 
-pub fn irc_to_core(
-    msg: &irc::proto::Message,
-    platform_id: &PlatformId,
-) -> Option<PlatformMessage> {
+pub fn irc_to_core(msg: &irc::proto::Message, platform_id: &PlatformId) -> Option<PlatformMessage> {
     match &msg.command {
         Command::PRIVMSG(channel, text) => {
             let nickname = msg.source_nickname().unwrap_or("unknown").to_owned();
