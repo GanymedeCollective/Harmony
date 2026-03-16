@@ -147,7 +147,7 @@ async fn platform_to_core_segment(
                 log::warn!(
                     "unresolved mention '{id}' on {source_id} -> falling back to text"
                 );
-                CoreMessageSegment::Text(id.clone())
+                CoreMessageSegment::Text(format!("@{id}"))
             }
         }
     }
