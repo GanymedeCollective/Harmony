@@ -81,9 +81,12 @@ fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> 
                 result.push_str(text);
             }
             CoreMessageSegment::Mention(core_user) => {
-                let platform_user = core_user.get_platform_user(platform_id).unwrap();
-                #[allow(clippy::unwrap_used)]
-                write!(result, "<@{}>", platform_user.id).unwrap();
+                if let Some(pu) = core_user.get_platform_user(platform_id) {
+                    let _ = write!(result, "<@{}>", pu.id);
+                } else {
+                    let name = core_user.display_name().unwrap_or("unknown");
+                    let _ = write!(result, "@{name}");
+                }
             }
         }
     }
