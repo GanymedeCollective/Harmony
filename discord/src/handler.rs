@@ -1,14 +1,10 @@
 //! Serenity event handler: forwards Discord gateway events as core messages and meta-events.
 
-use std::collections::HashMap;
-
 use async_trait::async_trait;
-use bridge_core::{
-    ListUsers, MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser,
-};
+use bridge_core::{MetaEvent, PlatformChannel, PlatformId, PlatformMessage, PlatformUser};
 use serenity::all::{
     ChannelType, Context, EventHandler, GuildChannel, GuildId, GuildMemberUpdateEvent, Member,
-    Ready, User as SerenityUser, UserId,
+    Ready, User as SerenityUser,
 };
 use serenity::model::channel::Message as SerenityMessage;
 use tokio::sync::mpsc;

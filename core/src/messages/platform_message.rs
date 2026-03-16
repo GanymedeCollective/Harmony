@@ -13,7 +13,8 @@ pub struct PlatformMessage {
 #[derive(Debug, Clone)]
 pub enum PlatformMessageSegment {
     Text(String),
-    Mention(PlatformUser),
+    //        ID
+    Mention(String),
 }
 
 /// A rope of message segments.

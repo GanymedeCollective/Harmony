@@ -1,6 +1,7 @@
 //! Sends bridged messages via per-channel webhooks, and implements listing capabilities.
 
 use std::collections::HashMap;
+use std::fmt::Write as _;
 use std::sync::Arc;
 
 use bridge_core::{
@@ -80,9 +81,9 @@ fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> 
                 result.push_str(text);
             }
             CoreMessageSegment::Mention(core_user) => {
-                // SAFETY: unwrap is safe because a mention to a non-existent platform user is converted to a [`PlatformMessageSegment::Text`]
                 let platform_user = core_user.get_platform_user(platform_id).unwrap();
-                result.push_str(&format!("<@{}>", platform_user.id));
+                #[allow(clippy::unwrap_used)]
+                write!(result, "<@{}>", platform_user.id).unwrap();
             }
         }
     }

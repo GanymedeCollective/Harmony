@@ -7,46 +7,29 @@ use bridge_core::{
 use irc::proto::Command;
 
 /// Parses a message text into a [`PlatformMessageRope`].
-fn parse_message(text: String, users: &Vec<PlatformUser>) -> PlatformMessageRope {
+///
+/// `@word` tokens are emitted as [`PlatformMessageSegment::Mention`] candidates
+/// carrying the nickname (the part after `@`). Core resolves them later.
+fn parse_message(text: &str) -> PlatformMessageRope {
     let mention_candidates: Vec<usize> = text.match_indices('@').map(|m| m.0).collect();
     let mut cursor = 0;
     let mut rope = PlatformMessageRope::new();
 
-    for mention_candidate in mention_candidates {
-        // Everything between the end of the previous mention and the start of the current one is text
-        let text_part = &text[cursor..mention_candidate];
+    for mention_start in mention_candidates {
+        let text_part = &text[cursor..mention_start];
         rope.push(PlatformMessageSegment::Text(text_part.to_string()));
 
-        // find the next ' ' char after mention_candidate
-        let mention_end = text[mention_candidate..]
+        let mention_end = text[mention_start..]
             .find(' ')
-            .map(|i| mention_candidate + i)
-            .unwrap_or(text.len());
-        let mention = text[mention_candidate..mention_end].to_string();
+            .map_or(text.len(), |i| mention_start + i);
 
-        let Some(user) = users.iter().find(|u| {
-            u.display_name
-                .as_deref()
-                .is_some_and(|name| format!("@{name}") == mention)
-        }) else {
-            // We don't know this user, fallback to text
-            log::error!("User not found with name {mention}");
-            log::error!("{:?}", users);
-            rope.push(PlatformMessageSegment::Text(mention));
-            cursor = mention_end;
-            continue;
-        };
-
-        log::error!("Found user with name {mention}");
-
-        rope.push(PlatformMessageSegment::Mention(user.clone()));
+        let nickname = &text[mention_start + 1..mention_end];
+        rope.push(PlatformMessageSegment::Mention(nickname.to_string()));
         cursor = mention_end;
     }
 
-    // push any remaining text after the last mention
     if cursor < text.len() {
-        let text = text[cursor..].to_string();
-        rope.push(PlatformMessageSegment::Text(text));
+        rope.push(PlatformMessageSegment::Text(text[cursor..].to_string()));
     }
 
     rope
@@ -55,7 +38,6 @@ fn parse_message(text: String, users: &Vec<PlatformUser>) -> PlatformMessageRope
 pub fn irc_to_core(
     msg: &irc::proto::Message,
     platform_id: &PlatformId,
-    users: &Vec<PlatformUser>,
 ) -> Option<PlatformMessage> {
     match &msg.command {
         Command::PRIVMSG(channel, text) => {
@@ -73,7 +55,7 @@ pub fn irc_to_core(
                     id: channel.clone(),
                     name: channel.clone(),
                 },
-                content: parse_message(text.clone(), users),
+                content: parse_message(text),
             })
         }
         _ => None,

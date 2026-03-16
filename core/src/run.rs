@@ -135,21 +135,19 @@ async fn platform_to_core_segment(
 ) -> CoreMessageSegment {
     match segment {
         PlatformMessageSegment::Text(text) => CoreMessageSegment::Text(text.clone()),
-        PlatformMessageSegment::Mention(platform_user) => {
-            let mentionned_user = {
+        PlatformMessageSegment::Mention(id) => {
+            let mentioned_user = {
                 let users = ctx.users.read().await;
-                users.find(source_id, &platform_user.id).cloned()
+                users.find(source_id, id).cloned()
             };
 
-            match mentionned_user {
-                Some(user) => CoreMessageSegment::Mention(user.clone()),
-                None => {
-                    log::warn!(
-                        "Failed to mention user {} -> falling back to text",
-                        platform_user.id
-                    );
-                    CoreMessageSegment::Text(platform_user.id.clone())
-                }
+            if let Some(user) = mentioned_user {
+                CoreMessageSegment::Mention(user)
+            } else {
+                log::warn!(
+                    "unresolved mention '{id}' on {source_id} -> falling back to text"
+                );
+                CoreMessageSegment::Text(id.clone())
             }
         }
     }

@@ -1,5 +1,7 @@
 //! Sends bridged messages as IRC PRIVMSG.
 
+use std::fmt::Write as _;
+
 use bridge_core::{BoxFuture, CoreMessage, CoreMessageSegment, PlatformId, SendMessage};
 use irc::client as irc_client;
 
@@ -23,12 +25,12 @@ fn format_message_from_core(
             }
             CoreMessageSegment::Mention(core_user) => {
                 let platform_user = core_user.get_platform_user(platform_id).unwrap();
-                result.push_str(&format!("@{}", platform_user.id));
+                let _ = write!(result, "@{}", platform_user.id);
             }
         }
     }
 
-    format!("<{display_name}> {}", result)
+    format!("<{display_name}> {result}")
 }
 
 impl SendMessage for IrcSender {

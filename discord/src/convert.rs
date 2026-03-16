@@ -6,20 +6,27 @@ use bridge_core::{
 };
 use serenity::model::channel::Message as SerenityMessage;
 
-fn parse_message(text: String) -> PlatformMessageRope {
+fn parse_message(text: &str) -> PlatformMessageRope {
     let mention_candidates: Vec<usize> = text.match_indices("<@").map(|m| m.0).collect();
     let mut cursor = 0;
     let mut rope = PlatformMessageRope::new();
 
-    for mention_candidate in mention_candidates {
-        let text_part = &text[cursor..mention_candidate];
+    for mention_start in mention_candidates {
+        let text_part = &text[cursor..mention_start];
         rope.push(PlatformMessageSegment::Text(text_part.to_string()));
 
-        let mention_end = text[mention_candidate..]
+        let mention_end = text[mention_start..]
             .find('>')
-            .map(|i| mention_candidate + i + 1)
-            .unwrap_or(text.len());
-        let mention = text[mention_candidate..mention_end].to_string();
+            .map_or(text.len(), |i| mention_start + i + 1);
+
+        let user_id = text[mention_start + 2..mention_end.min(text.len())]
+            .trim_end_matches('>');
+        rope.push(PlatformMessageSegment::Mention(user_id.to_string()));
+        cursor = mention_end;
+    }
+
+    if cursor < text.len() {
+        rope.push(PlatformMessageSegment::Text(text[cursor..].to_string()));
     }
 
     rope
@@ -53,6 +60,6 @@ pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> Platf
             id: msg.channel_id.get().to_string(),
             name: msg.channel_id.get().to_string(),
         },
-        content: parse_message(content),
+        content: parse_message(&content),
     }
 }
