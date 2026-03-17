@@ -2,12 +2,16 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 
 use exn::{Exn, ResultExt as _};
 use tokio::sync::{RwLock, mpsc, oneshot};
 use tokio::task::JoinHandle;
 
 use crate::error::HarmonyError;
+
+const MAX_SEND_RETRIES: u32 = 3;
+const RETRY_BACKOFF: Duration = Duration::from_millis(200);
 use crate::{
     Channels, CoreChannel, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers,
     MetaEvent, Peers, PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage,
@@ -157,13 +161,24 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
         if platform == source_id {
             continue;
         }
-        if let Some(sender) = ctx.senders.get(platform)
-            && let Err(e) = sender.send_message(&core_msg).await
-        {
-            if e.is_temporary() {
-                log::warn!("{source_id} -> {platform}: relay failed (retryable): {e:?}");
-            } else {
-                log::error!("{source_id} -> {platform}: relay failed (permanent): {e:?}");
+        let Some(sender) = ctx.senders.get(platform) else {
+            continue;
+        };
+        let mut attempts = 0;
+        loop {
+            match sender.send_message(&core_msg).await {
+                Ok(()) => break,
+                Err(e) if e.is_temporary() && attempts < MAX_SEND_RETRIES => {
+                    attempts += 1;
+                    log::warn!(
+                        "{source_id} -> {platform}: relay failed (attempt {attempts}/{MAX_SEND_RETRIES}): {e:?}"
+                    );
+                    tokio::time::sleep(RETRY_BACKOFF * attempts).await;
+                }
+                Err(e) => {
+                    log::error!("{source_id} -> {platform}: relay failed (giving up): {e:?}");
+                    break;
+                }
             }
         }
     }
