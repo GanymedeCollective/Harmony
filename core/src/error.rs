@@ -18,8 +18,12 @@ enum ErrorKind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ErrorStatus {
+    /// Not retryable
     Permanent,
+    /// Retryable
     Temporary,
+    /// Retryable but retry did not fix
+    _Persistent,
 }
 
 #[derive(Debug)]
