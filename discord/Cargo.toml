@@ -9,7 +9,7 @@ harmony-core = { path = "../core" }
 log = "0.4"
 serenity = { version = "0.12", default-features = true }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync"] }
-exn = "0.3"
+exn.workspace = true
 async-trait = "0.1"
 
 [lints]
