@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-exn = "0.3"
+exn.workspace = true
 futures = "0.3.32"
 http = "1"
 log = "0.4"
