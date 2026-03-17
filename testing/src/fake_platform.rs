@@ -3,12 +3,12 @@
 //! `FakePlatform` implements `PlatformAdapter` so tests can inject
 //! messages/events on one side and assert what comes out the other.
 
-use std::error::Error;
 use std::time::Duration;
 
+use exn::Exn;
 use harmony_core::{
-    BoxFuture, CoreMessage, ListChannels, ListUsers, MetaEvent, PlatformAdapter, PlatformChannel,
-    PlatformHandle, PlatformId, PlatformMessage, PlatformUser, SendMessage,
+    BoxFuture, CoreMessage, HarmonyError, ListChannels, ListUsers, MetaEvent, PlatformAdapter,
+    PlatformChannel, PlatformHandle, PlatformId, PlatformMessage, PlatformUser, SendMessage,
 };
 use tokio::sync::{mpsc, oneshot};
 
@@ -50,7 +50,7 @@ impl PlatformAdapter for FakePlatform {
         self: Box<Self>,
         msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
-    ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn Error + Send + Sync>>> {
+    ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>> {
         Box::pin(async move {
             let id = self.id.clone();
             let mut inject_msg_rx = self.inject_msg_rx;
@@ -63,10 +63,16 @@ impl PlatformAdapter for FakePlatform {
                 loop {
                     tokio::select! {
                         Some(msg) = inject_msg_rx.recv() => {
-                            let _ = msg_tx.send((task_id.clone(), msg)).await;
+                            if msg_tx.send((task_id.clone(), msg)).await.is_err() {
+                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                break;
+                            }
                         }
                         Some(event) = inject_event_rx.recv() => {
-                            let _ = event_tx.send(event).await;
+                            if event_tx.send(event).await.is_err() {
+                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                break;
+                            }
                         }
                         _ = &mut shutdown_rx => break,
                     }
@@ -101,7 +107,7 @@ impl SendMessage for FakeSender {
     fn send_message<'a>(
         &'a self,
         message: &'a CoreMessage,
-    ) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>> {
+    ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         let _ = self.captured_tx.send(message.clone());
         Box::pin(async { Ok(()) })
     }
@@ -114,16 +120,14 @@ struct FakeLister {
 }
 
 impl ListUsers for FakeLister {
-    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Box<dyn Error + Send + Sync>>> {
+    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Exn<HarmonyError>>> {
         let users = self.users.clone();
         Box::pin(async move { Ok(users) })
     }
 }
 
 impl ListChannels for FakeLister {
-    fn list_channels(
-        &self,
-    ) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Box<dyn Error + Send + Sync>>> {
+    fn list_channels(&self) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Exn<HarmonyError>>> {
         let channels = self.channels.clone();
         Box::pin(async move { Ok(channels) })
     }

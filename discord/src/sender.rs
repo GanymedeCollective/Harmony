@@ -3,9 +3,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use exn::{Exn, OptionExt as _, ResultExt as _};
 use harmony_core::{
-    BoxFuture, CoreMessage, ListChannels, ListUsers, PlatformChannel, PlatformId, PlatformUser,
-    SendMessage,
+    BoxFuture, CoreMessage, HarmonyError, ListChannels, ListUsers, PlatformChannel, PlatformId,
+    PlatformUser, SendMessage,
 };
 use serenity::builder::{CreateWebhook, ExecuteWebhook};
 use serenity::model::id::ChannelId;
@@ -33,9 +34,11 @@ impl DiscordSender {
     async fn get_or_create_webhook(
         http: &serenity::http::Http,
         channel_id: u64,
-    ) -> anyhow::Result<Webhook> {
+    ) -> Result<Webhook, Exn<HarmonyError>> {
+        let err = || HarmonyError::send(format!("webhook setup failed for channel {channel_id}"));
+
         let cid = ChannelId::new(channel_id);
-        let existing = cid.webhooks(http).await?;
+        let existing = cid.webhooks(http).await.or_raise(err)?;
         if let Some(wh) = existing
             .into_iter()
             .find(|w| w.name.as_deref() == Some(WEBHOOK_NAME))
@@ -46,14 +49,12 @@ impl DiscordSender {
             log::debug!("discord: creating webhook in channel {channel_id}");
             Ok(cid
                 .create_webhook(http, CreateWebhook::new(WEBHOOK_NAME))
-                .await?)
+                .await
+                .or_raise(err)?)
         }
     }
 
-    async fn ensure_webhook(
-        &self,
-        channel_id: u64,
-    ) -> Result<Webhook, Box<dyn std::error::Error + Send + Sync>> {
+    async fn ensure_webhook(&self, channel_id: u64) -> Result<Webhook, Exn<HarmonyError>> {
         {
             let whs = self.webhooks.read().await;
             if let Some(wh) = whs.get(&channel_id) {
@@ -75,13 +76,20 @@ impl SendMessage for DiscordSender {
     fn send_message<'a>(
         &'a self,
         message: &'a CoreMessage,
-    ) -> BoxFuture<'a, Result<(), Box<dyn std::error::Error + Send + Sync>>> {
+    ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         Box::pin(async move {
+            let err = || HarmonyError::send("discord message relay failed");
+
             let channel = message
                 .channel
                 .get_platform_channel(&self.platform_id)
-                .ok_or("no channel alias for this platform")?;
-            let channel_id: u64 = channel.id.parse()?;
+                .ok_or_raise(|| {
+                    HarmonyError::send("no channel alias for this platform").permanent()
+                })?;
+            let channel_id: u64 = channel
+                .id
+                .parse::<u64>()
+                .or_raise(|| HarmonyError::internal("invalid channel id").permanent())?;
             let webhook = self.ensure_webhook(channel_id).await?;
 
             let display_name = message
@@ -103,16 +111,17 @@ impl SendMessage for DiscordSender {
             if let Some(url) = avatar_url {
                 exec = exec.avatar_url(url);
             }
-            webhook.execute(&self.http, false, exec).await?;
+            webhook
+                .execute(&self.http, false, exec)
+                .await
+                .or_raise(err)?;
             Ok(())
         })
     }
 }
 
 impl ListUsers for DiscordSender {
-    fn list_users(
-        &self,
-    ) -> BoxFuture<'_, Result<Vec<PlatformUser>, Box<dyn std::error::Error + Send + Sync>>> {
+    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Exn<HarmonyError>>> {
         Box::pin(async {
             let (_channels, users) =
                 crate::fetch::fetch_guild_data(&self.http, &self.platform_id).await?;
@@ -122,9 +131,7 @@ impl ListUsers for DiscordSender {
 }
 
 impl ListChannels for DiscordSender {
-    fn list_channels(
-        &self,
-    ) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Box<dyn std::error::Error + Send + Sync>>> {
+    fn list_channels(&self) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Exn<HarmonyError>>> {
         Box::pin(async {
             let (channels, _users) =
                 crate::fetch::fetch_guild_data(&self.http, &self.platform_id).await?;

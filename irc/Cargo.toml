@@ -8,6 +8,7 @@ license.workspace = true
 harmony-core = { path = "../core" }
 log = "0.4"
 irc = "1"
+exn = "0.3"
 futures = "0.3"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
 

@@ -1,9 +1,9 @@
 //! Listing users known to a platform.
 
-use std::error::Error;
+use exn::Exn;
 
-use crate::{BoxFuture, PlatformUser};
+use crate::{BoxFuture, HarmonyError, PlatformUser};
 
 pub trait ListUsers: Send + Sync {
-    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Box<dyn Error + Send + Sync>>>;
+    fn list_users(&self) -> BoxFuture<'_, Result<Vec<PlatformUser>, Exn<HarmonyError>>>;
 }
