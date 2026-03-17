@@ -7,6 +7,7 @@
 use core::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 enum ErrorKind {
     ConnectionFailed,
     SendFailed,
