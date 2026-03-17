@@ -384,8 +384,8 @@ dependencies = [
 name = "discord-adapter"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-trait",
+ "exn",
  "harmony-core",
  "log",
  "serenity",
@@ -514,6 +514,12 @@ checksum = "2d2f06b9cac1506ece98fe3231e3cc9c4410ec3d5b1f24ae1c8946f0742cdefc"
 dependencies = [
  "version_check",
 ]
+
+[[package]]
+name = "exn"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca6badeb8a07b76663c7d7cb0903c1cc40c38d6fc06d3a2206780c63e8b9496"
 
 [[package]]
 name = "fastrand"
@@ -732,7 +738,7 @@ dependencies = [
 name = "harmony-core"
 version = "0.1.0"
 dependencies = [
- "anyhow",
+ "exn",
  "futures",
  "http",
  "log",
@@ -743,7 +749,9 @@ dependencies = [
 name = "harmony-testing"
 version = "0.1.0"
 dependencies = [
+ "exn",
  "harmony-core",
+ "log",
  "tokio",
 ]
 
@@ -1051,6 +1059,7 @@ dependencies = [
 name = "irc-adapter"
 version = "0.1.0"
 dependencies = [
+ "exn",
  "futures",
  "harmony-core",
  "irc",

@@ -3,6 +3,7 @@
 mod adapter;
 pub mod capabilities;
 mod channels;
+mod error;
 mod event;
 mod messages;
 pub(crate) mod peers;
@@ -13,7 +14,9 @@ mod users;
 pub use adapter::{PlatformAdapter, PlatformHandle};
 pub use capabilities::{ListChannels, ListUsers, SendMessage};
 pub use channels::{Channels, CoreChannel, PlatformChannel};
+pub use error::HarmonyError;
 pub use event::MetaEvent;
+pub use exn::Exn;
 pub use futures::future::BoxFuture;
 pub use messages::{CoreMessage, PlatformMessage};
 pub use peers::{Peered, Peers};

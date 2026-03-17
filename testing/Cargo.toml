@@ -6,6 +6,8 @@ license.workspace = true
 
 [dependencies]
 harmony-core = { path = "../core" }
+exn = "0.3"
+log = "0.4"
 tokio = { version = "1", features = ["sync", "rt", "time"] }
 
 # Testing does not require the same level of clippy warnings

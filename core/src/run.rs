@@ -3,10 +3,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use anyhow::Result;
+use exn::{Exn, ResultExt as _};
 use tokio::sync::{RwLock, mpsc, oneshot};
 use tokio::task::JoinHandle;
 
+use crate::error::HarmonyError;
 use crate::{
     Channels, CoreChannel, CoreMessage, CoreUser, DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers,
     MetaEvent, Peers, PlatformAdapter, PlatformId, PlatformMessage, PlatformUser, SendMessage,
@@ -60,7 +61,9 @@ impl AdapterHandle {
 /// # Errors
 ///
 /// Returns an error if any adapter fails to start.
-pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<AdapterHandle> {
+pub async fn run(
+    adapters: Vec<Box<dyn PlatformAdapter>>,
+) -> Result<AdapterHandle, Exn<HarmonyError>> {
     let (msg_tx, mut msg_rx) =
         mpsc::channel::<(PlatformId, PlatformMessage)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
@@ -77,12 +80,11 @@ pub async fn run(adapters: Vec<Box<dyn PlatformAdapter>>) -> Result<AdapterHandl
             let tx = msg_tx.clone();
             let etx = event_tx.clone();
             async move {
-                let handle = adapter
-                    .start(tx, etx)
-                    .await
-                    .map_err(|e| anyhow::anyhow!("failed to start {name}: {e}"))?;
+                let handle = adapter.start(tx, etx).await.or_raise(|| {
+                    HarmonyError::connection(format!("failed to start platform {name}"))
+                })?;
                 log::info!("started platform: {}", handle.id);
-                Ok::<_, anyhow::Error>(handle)
+                Ok::<_, Exn<HarmonyError>>(handle)
             }
         })
         .collect();
@@ -158,7 +160,11 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
         if let Some(sender) = ctx.senders.get(platform)
             && let Err(e) = sender.send_message(&core_msg).await
         {
-            log::error!("{source_id} -> {platform}: relay failed: {e}");
+            if e.is_temporary() {
+                log::warn!("{source_id} -> {platform}: relay failed (retryable): {e:?}");
+            } else {
+                log::error!("{source_id} -> {platform}: relay failed (permanent): {e:?}");
+            }
         }
     }
 }
@@ -175,7 +181,7 @@ async fn discover_and_build(
                 log::info!("{pid}: discovered {} channel(s)", chs.len());
                 discovered_channels.push((pid.clone(), chs));
             }
-            Err(e) => log::error!("{pid}: failed to list channels: {e}"),
+            Err(e) => log::error!("{pid}: failed to list channels: {e:?}"),
         }
     }
 
@@ -186,7 +192,7 @@ async fn discover_and_build(
                 log::info!("{pid}: discovered {} user(s)", us.len());
                 discovered_users.push((pid.clone(), us));
             }
-            Err(e) => log::error!("{pid}: failed to list users: {e}"),
+            Err(e) => log::error!("{pid}: failed to list users: {e:?}"),
         }
     }
 

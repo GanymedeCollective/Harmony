@@ -1,11 +1,10 @@
 //! Lifecycle contract for platform crates
 
-use std::error::Error;
-
+use exn::Exn;
 use tokio::sync::{mpsc, oneshot};
 
 use crate::messages::PlatformMessage;
-use crate::{BoxFuture, ListChannels, ListUsers, MetaEvent, PlatformId, SendMessage};
+use crate::{BoxFuture, HarmonyError, ListChannels, ListUsers, MetaEvent, PlatformId, SendMessage};
 
 pub struct PlatformHandle {
     pub id: PlatformId,
@@ -24,5 +23,5 @@ pub trait PlatformAdapter: Send {
         self: Box<Self>,
         msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
-    ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn Error + Send + Sync>>>;
+    ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>>;
 }

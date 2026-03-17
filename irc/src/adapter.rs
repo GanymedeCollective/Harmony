@@ -3,11 +3,12 @@
 use std::collections::HashSet;
 use std::time::Duration;
 
-use harmony_core::{
-    BoxFuture, MetaEvent, PlatformAdapter, PlatformChannel, PlatformHandle, PlatformId,
-    PlatformMessage, PlatformUser,
-};
+use exn::{Exn, ResultExt as _};
 use futures::prelude::*;
+use harmony_core::{
+    BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformChannel, PlatformHandle,
+    PlatformId, PlatformMessage, PlatformUser,
+};
 use irc::client::{Client, ClientStream, Sender as RawSender};
 use irc::proto::{Command, Response};
 use tokio::sync::{mpsc, oneshot};
@@ -43,13 +44,15 @@ impl PlatformAdapter for IrcAdapter {
         self: Box<Self>,
         msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
-    ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn std::error::Error + Send + Sync>>> {
+    ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>> {
         Box::pin(async move {
+            let err = || HarmonyError::connection("irc connection failed");
+
             let platform_id = self.platform_id.clone();
             let mut config = self.config;
             config.channels = vec![];
-            let mut client = Client::from_config(config).await?;
-            client.identify()?;
+            let mut client = Client::from_config(config).await.or_raise(err)?;
+            client.identify().or_raise(err)?;
 
             let raw_sender = client.sender();
             let sender = IrcSender {
@@ -57,7 +60,7 @@ impl PlatformAdapter for IrcAdapter {
                 platform_id: platform_id.clone(),
             };
 
-            let mut stream = client.stream()?;
+            let mut stream = client.stream().or_raise(err)?;
             let bot_nickname = self.nickname;
 
             let (channels, users) =
@@ -237,13 +240,17 @@ async fn process_stream(
                         })
                     })
                     .collect();
-                if !users.is_empty() {
-                    let _ = event_tx
+                if !users.is_empty()
+                    && event_tx
                         .send(MetaEvent::UsersDiscovered {
                             platform: pid.clone(),
                             users,
                         })
-                        .await;
+                        .await
+                        .is_err()
+                {
+                    log::warn!("irc: receiver dropped, stopping stream");
+                    break;
                 }
             }
             Command::JOIN(_, _, _) => {
@@ -253,7 +260,7 @@ async fn process_stream(
                 if nick.eq_ignore_ascii_case(&bot_nickname) {
                     continue;
                 }
-                let _ = event_tx
+                if event_tx
                     .send(MetaEvent::UserJoined {
                         platform: pid.clone(),
                         user: PlatformUser {
@@ -263,7 +270,12 @@ async fn process_stream(
                             avatar_url: None,
                         },
                     })
-                    .await;
+                    .await
+                    .is_err()
+                {
+                    log::warn!("irc: receiver dropped, stopping stream");
+                    break;
+                }
             }
             Command::QUIT(_) => {
                 let Some(nick) = msg.source_nickname() else {
@@ -272,12 +284,17 @@ async fn process_stream(
                 if nick.eq_ignore_ascii_case(&bot_nickname) {
                     continue;
                 }
-                let _ = event_tx
+                if event_tx
                     .send(MetaEvent::UserLeft {
                         platform: pid.clone(),
                         id: nick.to_owned(),
                     })
-                    .await;
+                    .await
+                    .is_err()
+                {
+                    log::warn!("irc: receiver dropped, stopping stream");
+                    break;
+                }
             }
             Command::NICK(new_nick) => {
                 let Some(old_nick) = msg.source_nickname() else {
@@ -287,14 +304,19 @@ async fn process_stream(
                     bot_nickname.clone_from(new_nick);
                     continue;
                 }
-                let _ = event_tx
+                if event_tx
                     .send(MetaEvent::UserRenamed {
                         platform: pid.clone(),
                         old_id: old_nick.to_owned(),
                         new_id: new_nick.clone(),
                         new_display_name: Some(new_nick.clone()),
                     })
-                    .await;
+                    .await
+                    .is_err()
+                {
+                    log::warn!("irc: receiver dropped, stopping stream");
+                    break;
+                }
             }
             _ => {}
         }

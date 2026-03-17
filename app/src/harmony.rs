@@ -8,11 +8,11 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use args::Args;
-use harmony_core::PlatformAdapter;
 use clap::Parser;
+use harmony_core::PlatformAdapter;
 
-use irc_adapter::IrcAdapter;
 use discord_adapter::DiscordAdapter;
+use irc_adapter::IrcAdapter;
 
 #[must_use]
 fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
@@ -21,9 +21,7 @@ fn create_adapters(cfg: &config::Config) -> Vec<Box<dyn PlatformAdapter>> {
             cfg.irc.to_irc_config(),
             cfg.irc.nickname.clone(),
         )),
-        Box::new(DiscordAdapter::new(
-            cfg.discord.token.clone(),
-        )),
+        Box::new(DiscordAdapter::new(cfg.discord.token.clone())),
     ]
 }
 
@@ -44,7 +42,9 @@ async fn main() -> Result<()> {
     let cfg = config::load(&config_path)?;
     let adapters = create_adapters(&cfg);
 
-    let handle = harmony_core::run::run(adapters).await?;
+    let handle = harmony_core::run::run(adapters)
+        .await
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
 
     log::info!("Harmony is running, ctrl+c to stop");
     tokio::signal::ctrl_c().await?;

@@ -1,11 +1,9 @@
 //! Listing channels known to a platform.
 
-use std::error::Error;
+use exn::Exn;
 
-use crate::{BoxFuture, PlatformChannel};
+use crate::{BoxFuture, HarmonyError, PlatformChannel};
 
 pub trait ListChannels: Send + Sync {
-    fn list_channels(
-        &self,
-    ) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Box<dyn Error + Send + Sync>>>;
+    fn list_channels(&self) -> BoxFuture<'_, Result<Vec<PlatformChannel>, Exn<HarmonyError>>>;
 }

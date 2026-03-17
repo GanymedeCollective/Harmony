@@ -1,7 +1,9 @@
 //! Starts a Serenity client, produces a `PlatformHandle`.
 
+use exn::{Exn, ResultExt as _};
 use harmony_core::{
-    BoxFuture, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId, PlatformMessage,
+    BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId,
+    PlatformMessage,
 };
 use tokio::sync::{mpsc, oneshot};
 
@@ -31,8 +33,10 @@ impl PlatformAdapter for DiscordAdapter {
         self: Box<Self>,
         msg_tx: mpsc::Sender<(PlatformId, PlatformMessage)>,
         event_tx: mpsc::Sender<MetaEvent>,
-    ) -> BoxFuture<'static, Result<PlatformHandle, Box<dyn std::error::Error + Send + Sync>>> {
+    ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>> {
         Box::pin(async move {
+            let err = || HarmonyError::connection("discord client setup failed");
+
             let platform_id = self.platform_id.clone();
             let intents = serenity::all::GatewayIntents::GUILD_MESSAGES
                 | serenity::all::GatewayIntents::DIRECT_MESSAGES
@@ -49,7 +53,8 @@ impl PlatformAdapter for DiscordAdapter {
 
             let mut client = serenity::Client::builder(&self.token, intents)
                 .event_handler(handler)
-                .await?;
+                .await
+                .or_raise(err)?;
 
             let http = client.http.clone();
             let shard_manager = client.shard_manager.clone();

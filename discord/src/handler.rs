@@ -47,7 +47,7 @@ impl EventHandler for Handler {
         if new_member.user.bot {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::UserJoined {
                 platform: self.platform_id.clone(),
@@ -62,7 +62,11 @@ impl EventHandler for Handler {
                     avatar_url: new_member.user.avatar_url(),
                 },
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 
     async fn guild_member_removal(
@@ -75,13 +79,17 @@ impl EventHandler for Handler {
         if user.bot {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::UserLeft {
                 platform: self.platform_id.clone(),
                 id: user.id.get().to_string(),
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 
     async fn guild_member_update(
@@ -94,7 +102,7 @@ impl EventHandler for Handler {
         if event.user.bot {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::UserUpdated {
                 platform: self.platform_id.clone(),
@@ -109,14 +117,18 @@ impl EventHandler for Handler {
                     avatar_url: event.user.avatar_url(),
                 },
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 
     async fn channel_create(&self, _ctx: Context, channel: GuildChannel) {
         if channel.kind != ChannelType::Text {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::ChannelCreated {
                 platform: self.platform_id.clone(),
@@ -126,7 +138,11 @@ impl EventHandler for Handler {
                     name: channel.name.clone(),
                 },
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 
     async fn channel_delete(
@@ -138,20 +154,24 @@ impl EventHandler for Handler {
         if channel.kind != ChannelType::Text {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::ChannelDeleted {
                 platform: self.platform_id.clone(),
                 id: channel.id.get().to_string(),
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 
     async fn channel_update(&self, _ctx: Context, _old: Option<GuildChannel>, new: GuildChannel) {
         if new.kind != ChannelType::Text {
             return;
         }
-        let _ = self
+        if self
             .event_tx
             .send(MetaEvent::ChannelUpdated {
                 platform: self.platform_id.clone(),
@@ -161,6 +181,10 @@ impl EventHandler for Handler {
                     name: new.name.clone(),
                 },
             })
-            .await;
+            .await
+            .is_err()
+        {
+            log::warn!("discord: receiver dropped, handler will stop forwarding");
+        }
     }
 }
