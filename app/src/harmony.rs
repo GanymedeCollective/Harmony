@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
 
     let handle = harmony_core::run::run(adapters)
         .await
-        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+        .map_err(|e| anyhow::anyhow!("{e}"))?;
 
     log::info!("Harmony is running, ctrl+c to stop");
     tokio::signal::ctrl_c().await?;

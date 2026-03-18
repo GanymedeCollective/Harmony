@@ -171,12 +171,12 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
                 Err(e) if e.is_temporary() && attempts < MAX_SEND_RETRIES => {
                     attempts += 1;
                     log::warn!(
-                        "{source_id} -> {platform}: relay failed (attempt {attempts}/{MAX_SEND_RETRIES}): {e:?}"
+                        "{source_id} -> {platform}: relay failed (attempt {attempts}/{MAX_SEND_RETRIES}): {e}"
                     );
                     tokio::time::sleep(RETRY_BACKOFF * attempts).await;
                 }
                 Err(e) => {
-                    log::error!("{source_id} -> {platform}: relay failed (giving up): {e:?}");
+                    log::error!("{source_id} -> {platform}: relay failed (giving up): {e}");
                     break;
                 }
             }
@@ -196,7 +196,7 @@ async fn discover_and_build(
                 log::info!("{pid}: discovered {} channel(s)", chs.len());
                 discovered_channels.push((pid.clone(), chs));
             }
-            Err(e) => log::error!("{pid}: failed to list channels: {e:?}"),
+            Err(e) => log::error!("{pid}: failed to list channels: {e}"),
         }
     }
 
@@ -207,7 +207,7 @@ async fn discover_and_build(
                 log::info!("{pid}: discovered {} user(s)", us.len());
                 discovered_users.push((pid.clone(), us));
             }
-            Err(e) => log::error!("{pid}: failed to list users: {e:?}"),
+            Err(e) => log::error!("{pid}: failed to list users: {e}"),
         }
     }
 
