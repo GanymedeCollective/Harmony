@@ -35,8 +35,6 @@ impl PlatformAdapter for DiscordAdapter {
         event_tx: mpsc::Sender<MetaEvent>,
     ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>> {
         Box::pin(async move {
-            let err = || HarmonyError::connection("discord client setup failed");
-
             let platform_id = self.platform_id.clone();
             let intents = serenity::all::GatewayIntents::GUILD_MESSAGES
                 | serenity::all::GatewayIntents::DIRECT_MESSAGES
@@ -54,7 +52,7 @@ impl PlatformAdapter for DiscordAdapter {
             let mut client = serenity::Client::builder(&self.token, intents)
                 .event_handler(handler)
                 .await
-                .or_raise(err)?;
+                .or_raise(|| HarmonyError::connection("discord client setup failed"))?;
 
             let http = client.http.clone();
             let shard_manager = client.shard_manager.clone();
