@@ -8,9 +8,10 @@ pub async fn fetch_guild_data(
     http: &serenity::http::Http,
     platform_id: &PlatformId,
 ) -> Result<(Vec<PlatformChannel>, Vec<PlatformUser>), Exn<HarmonyError>> {
-    let err = || HarmonyError::discovery("discord guild discovery failed");
-
-    let guilds = http.get_guilds(None, Some(100)).await.or_raise(err)?;
+    let guilds = http
+        .get_guilds(None, Some(100))
+        .await
+        .or_raise(|| HarmonyError::discovery("discord guild discovery failed"))?;
     log::info!("discord: found {} guild(s)", guilds.len());
 
     let mut channels = Vec::new();
@@ -25,7 +26,10 @@ pub async fn fetch_guild_data(
             guild_id
         );
 
-        let guild_channels = http.get_channels(guild_id).await.or_raise(err)?;
+        let guild_channels = http
+            .get_channels(guild_id)
+            .await
+            .or_raise(|| HarmonyError::discovery("discord guild discovery failed"))?;
         for ch in guild_channels {
             if ch.kind == ChannelType::Text {
                 channels.push(PlatformChannel {
@@ -41,7 +45,7 @@ pub async fn fetch_guild_data(
             let members = http
                 .get_guild_members(guild_id, Some(1000), after)
                 .await
-                .or_raise(err)?;
+                .or_raise(|| HarmonyError::discovery("discord guild discovery failed"))?;
             if members.is_empty() {
                 break;
             }

@@ -35,10 +35,10 @@ impl DiscordSender {
         http: &serenity::http::Http,
         channel_id: u64,
     ) -> Result<Webhook, Exn<HarmonyError>> {
-        let err = || HarmonyError::send(format!("webhook setup failed for channel {channel_id}"));
-
         let cid = ChannelId::new(channel_id);
-        let existing = cid.webhooks(http).await.or_raise(err)?;
+        let existing = cid.webhooks(http).await.or_raise(|| {
+            HarmonyError::send(format!("webhook setup failed for channel {channel_id}"))
+        })?;
         if let Some(wh) = existing
             .into_iter()
             .find(|w| w.name.as_deref() == Some(WEBHOOK_NAME))
@@ -50,7 +50,9 @@ impl DiscordSender {
             Ok(cid
                 .create_webhook(http, CreateWebhook::new(WEBHOOK_NAME))
                 .await
-                .or_raise(err)?)
+                .or_raise(|| {
+                    HarmonyError::send(format!("webhook setup failed for channel {channel_id}"))
+                })?)
         }
     }
 
@@ -78,8 +80,6 @@ impl SendMessage for DiscordSender {
         message: &'a CoreMessage,
     ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         Box::pin(async move {
-            let err = || HarmonyError::send("discord message relay failed");
-
             let channel = message
                 .channel
                 .get_platform_channel(&self.platform_id)
@@ -114,7 +114,7 @@ impl SendMessage for DiscordSender {
             webhook
                 .execute(&self.http, false, exec)
                 .await
-                .or_raise(err)?;
+                .or_raise(|| HarmonyError::send("discord message relay failed"))?;
             Ok(())
         })
     }

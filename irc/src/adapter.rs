@@ -46,13 +46,15 @@ impl PlatformAdapter for IrcAdapter {
         event_tx: mpsc::Sender<MetaEvent>,
     ) -> BoxFuture<'static, Result<PlatformHandle, Exn<HarmonyError>>> {
         Box::pin(async move {
-            let err = || HarmonyError::connection("irc connection failed");
-
             let platform_id = self.platform_id.clone();
             let mut config = self.config;
             config.channels = vec![];
-            let mut client = Client::from_config(config).await.or_raise(err)?;
-            client.identify().or_raise(err)?;
+            let mut client = Client::from_config(config)
+                .await
+                .or_raise(|| HarmonyError::connection("irc connection failed"))?;
+            client
+                .identify()
+                .or_raise(|| HarmonyError::connection("irc connection failed"))?;
 
             let raw_sender = client.sender();
             let sender = IrcSender {
@@ -60,7 +62,9 @@ impl PlatformAdapter for IrcAdapter {
                 platform_id: platform_id.clone(),
             };
 
-            let mut stream = client.stream().or_raise(err)?;
+            let mut stream = client
+                .stream()
+                .or_raise(|| HarmonyError::connection("irc connection failed"))?;
             let bot_nickname = self.nickname;
 
             let (channels, users) =
