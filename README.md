@@ -69,12 +69,3 @@ Docker
 docker build -t harmony .
 docker run -v /path/to/config.toml:/config.toml -d harmony -c /config.toml
 ```
-
-TODO
-----
-
-- [ ] Detect meta references (reference to other user, reference to channel ...)
-- [ ] Attachment relay (download + reupload instead of just URLs)
-- [ ] Reply/edit awareness
-- [ ] Mechanism for threads: either ircv3, or create `#channel-name--thread-name` automagically
-- [ ] Automations (slash commands) to link a user in discord and in irc
