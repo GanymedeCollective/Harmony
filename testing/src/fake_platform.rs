@@ -27,6 +27,10 @@ pub struct FakePlatform {
 
 impl FakePlatform {
     #[must_use]
+    #[expect(
+        clippy::new_ret_no_self,
+        reason = "For testing purposes, it is easier to have new return this"
+    )]
     pub fn new(name: &str) -> (Box<dyn PlatformAdapter>, FakeControl) {
         Self::builder(name).build()
     }
