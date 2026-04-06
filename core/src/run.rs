@@ -1,12 +1,14 @@
 //! Lifecycle: start adapters, discover data, relay messages, handle events.
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use exn::{Exn, ResultExt as _};
-use tokio::sync::{RwLock, mpsc, oneshot};
-use tokio::task::JoinHandle;
+use {
+    exn::{Exn, ResultExt as _},
+    tokio::{
+        sync::{RwLock, mpsc, oneshot},
+        task::JoinHandle,
+    },
+};
 
 use crate::error::HarmonyError;
 
@@ -105,7 +107,7 @@ pub async fn run(
     drop(msg_tx);
     drop(event_tx);
 
-    let (channels, users) = discover_and_build(&channel_listers, &user_listers).await;
+    let (channels, users) = discover_and_build(channel_listers, user_listers).await;
 
     log::info!(
         "Harmony ready: {} channel bridge(s), {} user group(s)",
@@ -186,8 +188,8 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
 
 /// Query all adapters for their channels/users, then build the collections.
 async fn discover_and_build(
-    channel_listers: &HashMap<PlatformId, Box<dyn ListChannels>>,
-    user_listers: &HashMap<PlatformId, Box<dyn ListUsers>>,
+    channel_listers: HashMap<PlatformId, Box<dyn ListChannels>>,
+    user_listers: HashMap<PlatformId, Box<dyn ListUsers>>,
 ) -> (Channels, Users) {
     let mut discovered_channels = Vec::new();
     for (pid, lister) in channel_listers {
