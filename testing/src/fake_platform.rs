@@ -68,13 +68,13 @@ impl PlatformAdapter for FakePlatform {
                     tokio::select! {
                         Some(msg) = inject_msg_rx.recv() => {
                             if msg_tx.send((task_id.clone(), msg)).await.is_err() {
-                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                log::warn!("fake {task_id}: receiver dropped, stopping");
                                 break;
                             }
                         }
                         Some(event) = inject_event_rx.recv() => {
                             if event_tx.send(event).await.is_err() {
-                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                log::warn!("fake {task_id}: receiver dropped, stopping");
                                 break;
                             }
                         }

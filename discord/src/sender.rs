@@ -9,9 +9,10 @@ use harmony_core::{
     BoxFuture, CoreMessage, CoreMessageSegment, HarmonyError, ListChannels, ListUsers,
     PlatformChannel, PlatformId, PlatformUser, SendMessage,
 };
-use serenity::builder::{CreateWebhook, ExecuteWebhook};
-use serenity::model::id::ChannelId;
-use serenity::model::webhook::Webhook;
+use serenity::{
+    builder::{CreateWebhook, ExecuteWebhook},
+    model::{id::ChannelId, webhook::Webhook},
+};
 use tokio::sync::RwLock;
 
 use crate::convert::format_mention;
@@ -26,7 +27,7 @@ pub struct DiscordSender {
 }
 
 impl DiscordSender {
-    pub fn new(http: Arc<serenity::http::Http>, platform_id: PlatformId) -> Self {
+    pub(crate) fn new(http: Arc<serenity::http::Http>, platform_id: PlatformId) -> Self {
         Self {
             http,
             platform_id,
