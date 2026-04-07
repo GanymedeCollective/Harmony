@@ -35,6 +35,7 @@ fn format_message_from_core(
                         let _ = write!(result, "@{name}");
                     }
                 }
+                _ => panic!("Unimplemented CoreMessageSegment variant encountered"),
             }
             result
         });

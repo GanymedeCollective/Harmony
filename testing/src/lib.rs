@@ -22,6 +22,7 @@ pub fn rope_to_text(rope: &[CoreMessageSegment]) -> String {
             CoreMessageSegment::Mention(u) => {
                 format!("@{}", u.display_name().unwrap_or("unknown"))
             }
+            _ => panic!("Unimplemented CoreMessageSegment variant encountered"),
         })
         .collect()
 }

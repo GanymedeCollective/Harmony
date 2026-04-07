@@ -11,6 +11,7 @@ pub struct PlatformMessage {
 
 /// A segment of a message rope.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum PlatformMessageSegment {
     Text(String),
     //        ID

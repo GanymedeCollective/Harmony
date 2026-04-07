@@ -11,6 +11,7 @@ pub struct CoreMessage {
 
 /// A segment of a message rope.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum CoreMessageSegment {
     Text(String),
     Mention(CoreUser),
