@@ -19,23 +19,25 @@ fn format_message_from_core(
     display_name: &str,
     message: &CoreMessage,
 ) -> String {
-    let mut result = String::new();
-
-    for segment in &message.content {
-        match segment {
-            CoreMessageSegment::Text(text) => {
-                result.push_str(text);
-            }
-            CoreMessageSegment::Mention(core_user) => {
-                if let Some(pu) = core_user.get_platform_user(platform_id) {
-                    let _ = write!(result, "@{}", pu.id);
-                } else {
-                    let name = core_user.display_name().unwrap_or("unknown");
-                    let _ = write!(result, "@{name}");
+    let result = message
+        .content
+        .iter()
+        .fold(String::new(), |mut result, segment| {
+            match segment {
+                CoreMessageSegment::Text(text) => {
+                    result.push_str(text);
+                }
+                CoreMessageSegment::Mention(core_user) => {
+                    if let Some(pu) = core_user.get_platform_user(platform_id) {
+                        let _ = write!(result, "@{}", pu.id);
+                    } else {
+                        let name = core_user.display_name().unwrap_or("unknown");
+                        let _ = write!(result, "@{name}");
+                    }
                 }
             }
-        }
-    }
+            result
+        });
 
     format!("<{display_name}> {result}")
 }
