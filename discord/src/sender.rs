@@ -1,29 +1,31 @@
 //! Sends bridged messages via per-channel webhooks, and implements listing capabilities.
 
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
-use exn::{Exn, OptionExt as _, ResultExt as _};
-use harmony_core::{
-    BoxFuture, CoreMessage, HarmonyError, ListChannels, ListUsers, PlatformChannel, PlatformId,
-    PlatformUser, SendMessage,
+use {
+    exn::{Exn, OptionExt as _, ResultExt as _},
+    harmony_core::{
+        BoxFuture, CoreMessage, HarmonyError, ListChannels, ListUsers, PlatformChannel, PlatformId,
+        PlatformUser, SendMessage,
+    },
+    serenity::{
+        builder::{CreateWebhook, ExecuteWebhook},
+        model::{id::ChannelId, webhook::Webhook},
+    },
+    tokio::sync::RwLock,
 };
-use serenity::builder::{CreateWebhook, ExecuteWebhook};
-use serenity::model::id::ChannelId;
-use serenity::model::webhook::Webhook;
-use tokio::sync::RwLock;
 
 const WEBHOOK_NAME: &str = "Bridge";
 
 #[derive(Clone)]
-pub struct DiscordSender {
+pub(crate) struct DiscordSender {
     pub(crate) http: Arc<serenity::http::Http>,
     pub(crate) platform_id: PlatformId,
     webhooks: Arc<RwLock<HashMap<u64, Webhook>>>,
 }
 
 impl DiscordSender {
-    pub fn new(http: Arc<serenity::http::Http>, platform_id: PlatformId) -> Self {
+    pub(crate) fn new(http: Arc<serenity::http::Http>, platform_id: PlatformId) -> Self {
         Self {
             http,
             platform_id,

@@ -1,20 +1,21 @@
 //! Connects to IRC, spawns the message stream, produces a `PlatformHandle`.
 
-use std::collections::HashSet;
-use std::time::Duration;
-
-use exn::{Exn, ResultExt as _};
-use futures::prelude::*;
-use harmony_core::{
-    BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformChannel, PlatformHandle,
-    PlatformId, PlatformMessage, PlatformUser,
+use {
+    exn::{Exn, ResultExt as _},
+    futures::prelude::*,
+    harmony_core::{
+        BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformChannel, PlatformHandle,
+        PlatformId, PlatformMessage, PlatformUser,
+    },
+    irc::{
+        client::{Client, ClientStream, Sender as RawSender},
+        proto::{Command, Response},
+    },
+    std::{collections::HashSet, sync::Arc, time::Duration},
+    tokio::sync::{mpsc, oneshot},
 };
-use irc::client::{Client, ClientStream, Sender as RawSender};
-use irc::proto::{Command, Response};
-use tokio::sync::{mpsc, oneshot};
 
-use crate::lister::IrcLister;
-use crate::sender::IrcSender;
+use crate::{lister::IrcLister, sender::IrcSender};
 
 pub use irc::client::data::Config as IrcConfig;
 
@@ -85,10 +86,12 @@ impl PlatformAdapter for IrcAdapter {
                 }
             });
 
+            let lister = Arc::new(lister);
+
             Ok(PlatformHandle {
                 id: platform_id,
                 sender: Box::new(sender),
-                user_lister: Box::new(lister.clone()),
+                user_lister: Box::new(Arc::clone(&lister)),
                 channel_lister: Box::new(lister),
                 shutdown_tx,
             })

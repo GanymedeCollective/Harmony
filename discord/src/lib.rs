@@ -4,7 +4,7 @@ mod adapter;
 mod convert;
 mod fetch;
 mod handler;
+mod proxy;
 mod sender;
 
 pub use adapter::DiscordAdapter;
-pub use sender::DiscordSender;
