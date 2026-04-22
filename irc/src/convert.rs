@@ -16,20 +16,30 @@ fn parse_message(text: &str) -> PlatformMessageRope {
     let mut rope = PlatformMessageRope::new();
 
     for mention_start in mention_candidates {
-        let text_part = &text[cursor..mention_start];
-        rope.push(PlatformMessageSegment::Text(text_part.to_string()));
+        if mention_start > 0 && !text.as_bytes()[mention_start - 1].is_ascii_whitespace() {
+            continue;
+        }
 
         let mention_end = text[mention_start..]
             .find(' ')
             .map_or(text.len(), |i| mention_start + i);
 
         let nickname = &text[mention_start + 1..mention_end];
-        rope.push(PlatformMessageSegment::Mention(nickname.to_string()));
+        if nickname.is_empty() {
+            continue;
+        }
+
+        if cursor < mention_start {
+            rope.push(PlatformMessageSegment::Text(
+                text[cursor..mention_start].to_owned(),
+            ));
+        }
+        rope.push(PlatformMessageSegment::Mention(nickname.to_owned()));
         cursor = mention_end;
     }
 
     if cursor < text.len() {
-        rope.push(PlatformMessageSegment::Text(text[cursor..].to_string()));
+        rope.push(PlatformMessageSegment::Text(text[cursor..].to_owned()));
     }
 
     rope

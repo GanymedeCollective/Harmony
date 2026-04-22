@@ -12,20 +12,36 @@ fn parse_message(text: &str) -> PlatformMessageRope {
     let mut rope = PlatformMessageRope::new();
 
     for mention_start in mention_candidates {
-        let text_part = &text[cursor..mention_start];
-        rope.push(PlatformMessageSegment::Text(text_part.to_string()));
+        let Some(close_offset) = text[mention_start..].find('>') else {
+            break;
+        };
+        let mention_end = mention_start + close_offset + 1;
 
-        let mention_end = text[mention_start..]
-            .find('>')
-            .map_or(text.len(), |i| mention_start + i + 1);
+        let mut inner = &text[mention_start + 2..mention_end - 1];
 
-        let user_id = text[mention_start + 2..mention_end.min(text.len())].trim_end_matches('>');
-        rope.push(PlatformMessageSegment::Mention(user_id.to_string()));
+        if inner.starts_with('&') {
+            continue;
+        }
+
+        if inner.starts_with('!') {
+            inner = &inner[1..];
+        }
+
+        if inner.is_empty() {
+            continue;
+        }
+
+        if cursor < mention_start {
+            rope.push(PlatformMessageSegment::Text(
+                text[cursor..mention_start].to_owned(),
+            ));
+        }
+        rope.push(PlatformMessageSegment::Mention(inner.to_owned()));
         cursor = mention_end;
     }
 
     if cursor < text.len() {
-        rope.push(PlatformMessageSegment::Text(text[cursor..].to_string()));
+        rope.push(PlatformMessageSegment::Text(text[cursor..].to_owned()));
     }
 
     rope

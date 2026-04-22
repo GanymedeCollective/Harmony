@@ -92,7 +92,7 @@ fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> 
                         let _ = write!(result, "@{name}");
                     }
                 }
-                _ => panic!("Unimplemented CoreMessageSegment variant encountered"),
+                _ => log::warn!("skipping unknown message segment: {segment:?}"),
             }
             result
         })
