@@ -6,25 +6,30 @@ use harmony_core::{
 };
 use serenity::model::channel::Message as SerenityMessage;
 
+const EMBED_START: &str = "<@";
+const EMBED_END: char = '>';
+const ROLE_PREFIX: char = '&';
+const NICK_PREFIX: char = '!';
+
 fn parse_message(text: &str) -> PlatformMessageRope {
-    let mention_candidates: Vec<usize> = text.match_indices("<@").map(|m| m.0).collect();
+    let mention_candidates: Vec<usize> = text.match_indices(EMBED_START).map(|m| m.0).collect();
     let mut cursor = 0;
     let mut rope = PlatformMessageRope::new();
 
     for mention_start in mention_candidates {
-        let Some(close_offset) = text[mention_start..].find('>') else {
+        let Some(close_offset) = text[mention_start..].find(EMBED_END) else {
             break;
         };
         let mention_end = mention_start + close_offset + 1;
 
-        let mut inner = &text[mention_start + 2..mention_end - 1];
+        let mut inner = &text[mention_start + EMBED_START.len()..mention_end - 1];
 
-        if inner.starts_with('&') {
+        if inner.starts_with(ROLE_PREFIX) {
             continue;
         }
 
-        if inner.starts_with('!') {
-            inner = &inner[1..];
+        if inner.starts_with(NICK_PREFIX) {
+            inner = &inner[NICK_PREFIX.len_utf8()..];
         }
 
         if inner.is_empty() {

@@ -6,12 +6,15 @@ use harmony_core::{
 };
 use irc::proto::Command;
 
+const MENTION_PREFIX: &str = "@";
+const MENTION_SEPARATOR: char = ' ';
+
 /// Parses a message text into a [`PlatformMessageRope`].
 ///
 /// `@word` tokens are emitted as [`PlatformMessageSegment::Mention`] candidates
 /// carrying the nickname (the part after `@`). Core resolves them later.
 fn parse_message(text: &str) -> PlatformMessageRope {
-    let mention_candidates: Vec<usize> = text.match_indices('@').map(|m| m.0).collect();
+    let mention_candidates: Vec<usize> = text.match_indices(MENTION_PREFIX).map(|m| m.0).collect();
     let mut cursor = 0;
     let mut rope = PlatformMessageRope::new();
 
@@ -21,10 +24,10 @@ fn parse_message(text: &str) -> PlatformMessageRope {
         }
 
         let mention_end = text[mention_start..]
-            .find(' ')
+            .find(MENTION_SEPARATOR)
             .map_or(text.len(), |i| mention_start + i);
 
-        let nickname = &text[mention_start + 1..mention_end];
+        let nickname = &text[mention_start + MENTION_PREFIX.len()..mention_end];
         if nickname.is_empty() {
             continue;
         }
