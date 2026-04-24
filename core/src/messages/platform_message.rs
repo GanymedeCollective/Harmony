@@ -14,7 +14,7 @@ pub struct PlatformMessage {
 #[non_exhaustive]
 pub enum PlatformMessageSegment {
     Text(String),
-    //        ID
+    // Mention(ID)
     Mention(String),
 }
 
