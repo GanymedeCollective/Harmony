@@ -8,6 +8,8 @@ use harmony_core::{
 };
 use irc::client as irc_client;
 
+use crate::convert::format_mention;
+
 #[derive(Clone)]
 pub struct IrcSender {
     pub(crate) inner: irc_client::Sender,
@@ -29,7 +31,7 @@ fn format_message_from_core(
                 }
                 CoreMessageSegment::Mention(core_user) => {
                     if let Some(pu) = core_user.get_platform_user(platform_id) {
-                        let _ = write!(result, "@{}", pu.id);
+                        result.push_str(&format_mention(&pu.id));
                     } else {
                         let name = core_user.display_name().unwrap_or("unknown");
                         let _ = write!(result, "@{name}");

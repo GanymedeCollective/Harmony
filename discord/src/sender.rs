@@ -14,6 +14,8 @@ use serenity::model::id::ChannelId;
 use serenity::model::webhook::Webhook;
 use tokio::sync::RwLock;
 
+use crate::convert::format_mention;
+
 const WEBHOOK_NAME: &str = "Bridge";
 
 #[derive(Clone)]
@@ -86,7 +88,7 @@ fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> 
                 }
                 CoreMessageSegment::Mention(core_user) => {
                     if let Some(pu) = core_user.get_platform_user(platform_id) {
-                        let _ = write!(result, "<@{}>", pu.id);
+                        result.push_str(&format_mention(&pu.id));
                     } else {
                         let name = core_user.display_name().unwrap_or("unknown");
                         let _ = write!(result, "@{name}");

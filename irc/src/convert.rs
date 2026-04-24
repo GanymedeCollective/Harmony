@@ -9,6 +9,10 @@ use irc::proto::Command;
 const MENTION_PREFIX: &str = "@";
 const MENTION_SEPARATOR: char = ' ';
 
+pub fn format_mention(id: &str) -> String {
+    format!("{MENTION_PREFIX}{id}")
+}
+
 /// Parses a message text into a [`PlatformMessageRope`].
 ///
 /// `@word` tokens are emitted as [`PlatformMessageSegment::Mention`] candidates
