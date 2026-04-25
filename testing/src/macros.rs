@@ -73,7 +73,7 @@ macro_rules! send {
                     id: $channel.to_owned(),
                     name: $channel.to_owned(),
                 },
-                content: $content.to_owned(),
+                content: vec![$crate::PlatformMessageSegment::Text($content.to_owned())],
             })
             .await
     }};
@@ -91,6 +91,20 @@ macro_rules! send {
 /// ```
 #[macro_export]
 macro_rules! expect {
+    // Special arm: content == "..." renders the rope as plain text before comparing.
+    ($ctx:ident, $platform:ident, $channel:expr, { content == $val:expr $(,)? }) => {{
+        let __msg = $ctx
+            .control(stringify!($platform))
+            .next_message(::std::time::Duration::from_secs(2))
+            .await
+            .expect(concat!("expected ", stringify!($platform), " to receive a message"));
+        let __pc = __msg.channel
+            .get_platform_channel(&$crate::PlatformId::new(stringify!($platform)))
+            .expect(concat!("message should have channel alias for ", stringify!($platform)));
+        assert_eq!(__pc.id, $channel);
+        assert_eq!($crate::rope_to_text(&__msg.content), $val);
+    }};
+    // Generic arm: compare fields directly.
     ($ctx:ident, $platform:ident, $channel:expr, { $( $($field:ident).+ == $val:expr ),+ $(,)? }) => {{
         let __msg = $ctx
             .control(stringify!($platform))
