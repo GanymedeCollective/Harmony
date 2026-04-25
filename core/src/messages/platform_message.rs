@@ -14,7 +14,8 @@ pub struct PlatformMessage {
 #[non_exhaustive]
 pub enum PlatformMessageSegment {
     Text(String),
-    // Mention(ID)
+    // FIXME: `String` here is the platform-specific snowflake ID for the user
+    // being mentioned. We ought have it properly typed.
     Mention(String),
 }
 
