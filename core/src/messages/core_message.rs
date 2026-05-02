@@ -14,6 +14,7 @@ pub struct CoreMessage {
 pub enum CoreMessageSegment {
     Text(String),
     Mention(CoreUser),
+    MessageRef(Box<CoreMessage>),
 }
 
 /// A rope of message segments.

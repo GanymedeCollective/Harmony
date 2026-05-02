@@ -19,6 +19,10 @@ pub use fake_platform::{FakeControl, FakePlatform, FakePlatformBuilder};
 pub use world::{PlatformSpec, TestWorld, TestWorldBuilder, UserSpec};
 
 /// Render a [`CoreMessageRope`] as a plain string, formatting mentions as `@name`.
+///
+/// `MessageRef` segments recurse into their referenced message and surface as
+/// `[> @author: <inner>]` so deeply-nested refs remain visible in test
+/// assertion strings.
 pub fn rope_to_text(rope: &[CoreMessageSegment]) -> String {
     use std::fmt::Write as _;
 
@@ -27,6 +31,14 @@ pub fn rope_to_text(rope: &[CoreMessageSegment]) -> String {
             CoreMessageSegment::Text(t) => result.push_str(t),
             CoreMessageSegment::Mention(u) => {
                 let _ = write!(result, "@{}", u.display_name().unwrap_or("unknown"));
+            }
+            CoreMessageSegment::MessageRef(inner) => {
+                let _ = write!(
+                    result,
+                    "[> @{}: {}]",
+                    inner.author.display_name().unwrap_or("unknown"),
+                    rope_to_text(&inner.content),
+                );
             }
         }
         result

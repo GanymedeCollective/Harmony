@@ -1,11 +1,11 @@
 //! Lifecycle: start adapters, discover data, relay messages, handle events.
 
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
 use exn::{Exn, ResultExt as _};
-use tokio::sync::{RwLock, mpsc, oneshot};
+use tokio::sync::{mpsc, oneshot};
 use tokio::task::JoinHandle;
 
 use crate::error::HarmonyError;
@@ -14,8 +14,9 @@ const MAX_SEND_RETRIES: u32 = 3;
 const RETRY_BACKOFF: Duration = Duration::from_millis(200);
 use crate::{
     Channels, CoreChannel, CoreMessage, CoreMessageRope, CoreMessageSegment, CoreUser,
-    DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers, MetaEvent, Peers, PlatformAdapter, PlatformId,
-    PlatformMessage, PlatformMessageRope, PlatformMessageSegment, PlatformUser, SendMessage, Users,
+    DEFAULT_CHANNEL_BUFFER, ListChannels, ListUsers, MetaEvent, Peered, Peers, PlatformAdapter,
+    PlatformId, PlatformMessage, PlatformMessageRope, PlatformMessageSegment, PlatformUser,
+    SendMessage, Users,
 };
 
 /// A simple context used for dependency injection across core.
@@ -124,7 +125,7 @@ pub async fn run(
                     dispatch(ctx.clone(), &source_id, msg).await;
                 }
                 Some(event) = event_rx.recv() => {
-                    handle_event(ctx.clone(), &event).await;
+                    handle_event(&ctx, &event);
                 }
                 else => break,
             }
@@ -134,18 +135,26 @@ pub async fn run(
     Ok(AdapterHandle { task, shutdown_txs })
 }
 
-async fn platform_to_core_segment(
+/// Maximum quote-nesting depth at which `MessageRef` segments are preserved
+/// during platform→core conversion. Refs deeper than this collapse into a
+/// `Text("> ...")` truncation marker (see `platform_to_core_segment`).
+const MAX_REF_DEPTH: u8 = 4;
+
+fn platform_to_core_segment(
     ctx: &CoreCtx,
     source_id: &PlatformId,
     segment: &PlatformMessageSegment,
+    depth: u8,
 ) -> CoreMessageSegment {
     match segment {
         PlatformMessageSegment::Text(text) => CoreMessageSegment::Text(text.clone()),
         PlatformMessageSegment::Mention(id) => {
-            let mentioned_user = {
-                let users = ctx.users.read().await;
-                users.find(source_id, id).cloned()
-            };
+            let mentioned_user = ctx
+                .users
+                .read()
+                .expect("users lock poisoned")
+                .find(source_id, id)
+                .cloned();
 
             mentioned_user.map_or_else(
                 || {
@@ -155,18 +164,56 @@ async fn platform_to_core_segment(
                 CoreMessageSegment::Mention,
             )
         }
+        PlatformMessageSegment::MessageRef(ref_msg) => {
+            if depth >= MAX_REF_DEPTH {
+                // Surrounding `\n` so the marker stays on its own line in the
+                // parent's rendered rope (mirrors how a real `MessageRef`
+                // renders).
+                return CoreMessageSegment::Text("\n> ...\n".to_owned());
+            }
+
+            let core_channel = ctx
+                .channels
+                .read()
+                .expect("channels lock poisoned")
+                .find(source_id, &ref_msg.channel.id)
+                .cloned()
+                .unwrap_or_else(|| {
+                    CoreChannel::from_single_alias(source_id.clone(), ref_msg.channel.clone())
+                });
+
+            let core_author = ctx
+                .users
+                .read()
+                .expect("users lock poisoned")
+                .find(source_id, &ref_msg.author.id)
+                .cloned()
+                .unwrap_or_else(|| {
+                    CoreUser::from_single_alias(source_id.clone(), ref_msg.author.clone())
+                });
+
+            let core_content =
+                platform_to_core_message(ctx, source_id, &ref_msg.content, depth + 1);
+
+            CoreMessageSegment::MessageRef(Box::new(CoreMessage {
+                author: core_author,
+                channel: core_channel,
+                content: core_content,
+            }))
+        }
     }
 }
 
-async fn platform_to_core_message(
+fn platform_to_core_message(
     ctx: &CoreCtx,
     source_id: &PlatformId,
-    msg: PlatformMessageRope,
+    msg: &PlatformMessageRope,
+    depth: u8,
 ) -> CoreMessageRope {
     let mut core_msg = CoreMessageRope::new();
 
-    for segment in &msg {
-        core_msg.push(platform_to_core_segment(ctx, source_id, segment).await);
+    for segment in msg {
+        core_msg.push(platform_to_core_segment(ctx, source_id, segment, depth));
     }
 
     core_msg
@@ -174,10 +221,12 @@ async fn platform_to_core_message(
 
 /// Dispatches a platform message to all the registered platforms.
 async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessage) {
-    let core_channel = {
-        let ch = ctx.channels.read().await;
-        ch.find(source_id, &msg.channel.id).cloned()
-    };
+    let core_channel = ctx
+        .channels
+        .read()
+        .expect("channels lock poisoned")
+        .find(source_id, &msg.channel.id)
+        .cloned();
 
     let Some(core_channel) = core_channel else {
         log::debug!("{source_id}: no route for channel {}", msg.channel.id);
@@ -185,14 +234,14 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
     };
 
     let core_author = {
-        let mut u = ctx.users.write().await;
+        let mut u = ctx.users.write().expect("users lock poisoned");
         resolve_or_register(&mut u, source_id, &msg.author)
     };
 
     let core_msg = CoreMessage {
         author: core_author,
         channel: core_channel.clone(),
-        content: platform_to_core_message(&ctx, source_id, msg.content).await,
+        content: platform_to_core_message(&ctx, source_id, &msg.content, 0),
     };
 
     for platform in core_channel.alias.keys() {
@@ -274,15 +323,19 @@ fn resolve_or_register(
 }
 
 /// Handle a runtime event by directly updating the in-memory collections.
-async fn handle_event(ctx: Arc<CoreCtx>, event: &MetaEvent) {
-    let users = ctx.users.clone();
-    let channels = ctx.channels.clone();
+fn handle_event(ctx: &CoreCtx, event: &MetaEvent) {
     match event {
         MetaEvent::UserJoined { user, .. } | MetaEvent::UserUpdated { user, .. } => {
-            users.write().await.upsert(user.clone());
+            ctx.users
+                .write()
+                .expect("users lock poisoned")
+                .upsert(user.clone());
         }
         MetaEvent::UserLeft { platform, id } => {
-            users.write().await.detach(platform, id);
+            ctx.users
+                .write()
+                .expect("users lock poisoned")
+                .detach(platform, id);
         }
         MetaEvent::UserRenamed {
             platform,
@@ -290,24 +343,32 @@ async fn handle_event(ctx: Arc<CoreCtx>, event: &MetaEvent) {
             new_id,
             new_display_name,
         } => {
-            users
-                .write()
-                .await
-                .rename(platform, old_id, new_id, new_display_name.clone());
+            ctx.users.write().expect("users lock poisoned").rename(
+                platform,
+                old_id,
+                new_id,
+                new_display_name.clone(),
+            );
         }
         MetaEvent::UsersDiscovered {
             users: new_users, ..
         } => {
-            let mut u = users.write().await;
+            let mut u = ctx.users.write().expect("users lock poisoned");
             for user in new_users {
                 u.upsert(user.clone());
             }
         }
         MetaEvent::ChannelCreated { channel, .. } | MetaEvent::ChannelUpdated { channel, .. } => {
-            channels.write().await.upsert(channel.clone());
+            ctx.channels
+                .write()
+                .expect("channels lock poisoned")
+                .upsert(channel.clone());
         }
         MetaEvent::ChannelDeleted { platform, id } => {
-            channels.write().await.detach(platform, id);
+            ctx.channels
+                .write()
+                .expect("channels lock poisoned")
+                .detach(platform, id);
         }
     }
 }
