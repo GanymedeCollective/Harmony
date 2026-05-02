@@ -16,6 +16,7 @@ pub enum PlatformMessageSegment {
     // FIXME: `String` here is the platform-specific snowflake ID for the user
     // being mentioned. We ought have it properly typed.
     Mention(String),
+    MessageRef(Box<PlatformMessage>),
 }
 
 /// A rope of message segments.

@@ -72,6 +72,13 @@ pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> Platf
         .or_else(|| msg.author.global_name.clone())
         .or_else(|| Some(msg.author.name.clone()));
 
+    let mut rope = PlatformMessageRope::new();
+    if let Some(referenced) = msg.referenced_message.as_deref() {
+        let ref_msg = discord_to_core(referenced, platform_id);
+        rope.push(PlatformMessageSegment::MessageRef(Box::new(ref_msg)));
+    }
+    rope.extend(parse_message(&content));
+
     PlatformMessage {
         author: PlatformUser {
             platform: platform_id.clone(),
@@ -84,6 +91,6 @@ pub fn discord_to_core(msg: &SerenityMessage, platform_id: &PlatformId) -> Platf
             id: msg.channel_id.get().to_string(),
             name: msg.channel_id.get().to_string(),
         },
-        content: parse_message(&content),
+        content: rope,
     }
 }
