@@ -89,9 +89,9 @@ impl PlatformAdapter for IrcAdapter {
 
             Ok(PlatformHandle {
                 id: platform_id,
-                sender: Box::new(sender),
-                user_lister: Box::new(Arc::clone(&lister)),
-                channel_lister: Box::new(lister),
+                sender: Arc::new(sender),
+                user_lister: Arc::clone(&lister) as Arc<dyn harmony_core::ListUsers>,
+                channel_lister: lister,
                 shutdown_tx,
             })
         })

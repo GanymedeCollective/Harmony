@@ -1,13 +1,12 @@
 //! Starts a Serenity client, produces a `PlatformHandle`.
 
-
 use std::sync::Arc;
 
 use exn::{Exn, ResultExt as _};
 use harmony_core::{
-        BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId,
-        PlatformMessage, SendMessage,
-    };
+    BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId,
+    PlatformMessage, SendMessage,
+};
 use tokio::sync::{mpsc, oneshot};
 
 use crate::proxy::{DiscordSendProxy, SendRequest};
@@ -93,9 +92,9 @@ impl PlatformAdapter for DiscordAdapter {
 
             Ok(PlatformHandle {
                 id: platform_id,
-                sender: Box::new(DiscordSendProxy { tx: send_tx }),
-                user_lister: Box::new(Arc::clone(&lister)),
-                channel_lister: Box::new(lister),
+                sender: Arc::new(DiscordSendProxy { tx: send_tx }),
+                user_lister: Arc::clone(&lister) as Arc<dyn harmony_core::ListUsers>,
+                channel_lister: Arc::new(lister),
                 shutdown_tx,
             })
         })

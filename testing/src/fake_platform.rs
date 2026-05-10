@@ -3,8 +3,8 @@
 //! `FakePlatform` implements `PlatformAdapter` so tests can inject
 //! messages/events on one side and assert what comes out the other.
 
-use std::time::Duration;
 use std::sync::Arc;
+use std::time::Duration;
 
 use exn::Exn;
 use harmony_core::{
@@ -88,16 +88,16 @@ impl PlatformAdapter for FakePlatform {
                 captured_tx: self.captured_tx,
             };
 
-            let lister = FakeLister {
+            let lister = Arc::new(FakeLister {
                 channels: self.channels,
                 users: self.users,
-            };
+            });
 
             Ok(PlatformHandle {
                 id,
-                sender: Box::new(sender),
-                user_lister: Box::new(lister.clone()),
-                channel_lister: Box::new(lister),
+                sender: Arc::new(sender),
+                user_lister: Arc::clone(&lister) as Arc<dyn harmony_core::ListUsers>,
+                channel_lister: lister,
                 shutdown_tx,
             })
         })

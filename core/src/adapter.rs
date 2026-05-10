@@ -1,5 +1,7 @@
 //! Lifecycle contract for platform crates
 
+use std::sync::Arc;
+
 use exn::Exn;
 use tokio::sync::{mpsc, oneshot};
 
@@ -10,9 +12,9 @@ pub struct PlatformHandle {
     pub id: PlatformId,
     // TODO: Maybe have the capabilities boxed into one thing
     //       Once we have many of them it will become clumbersome
-    pub sender: Box<dyn SendMessage>,
-    pub user_lister: Box<dyn ListUsers>,
-    pub channel_lister: Box<dyn ListChannels>,
+    pub sender: Arc<dyn SendMessage>,
+    pub user_lister: Arc<dyn ListUsers>,
+    pub channel_lister: Arc<dyn ListChannels>,
     pub shutdown_tx: oneshot::Sender<()>,
 }
 
