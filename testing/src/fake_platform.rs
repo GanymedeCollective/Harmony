@@ -3,6 +3,7 @@
 //! `FakePlatform` implements `PlatformAdapter` so tests can inject
 //! messages/events on one side and assert what comes out the other.
 
+use std::sync::Arc;
 use std::time::Duration;
 
 use exn::Exn;
@@ -20,7 +21,7 @@ pub struct FakePlatform {
     id: PlatformId,
     inject_msg_rx: mpsc::Receiver<PlatformMessage>,
     inject_event_rx: mpsc::Receiver<MetaEvent>,
-    captured_tx: mpsc::UnboundedSender<CoreMessage>,
+    captured_tx: mpsc::UnboundedSender<Arc<CoreMessage>>,
     channels: Vec<PlatformChannel>,
     users: Vec<PlatformUser>,
 }
@@ -68,13 +69,13 @@ impl PlatformAdapter for FakePlatform {
                     tokio::select! {
                         Some(msg) = inject_msg_rx.recv() => {
                             if msg_tx.send((task_id.clone(), msg)).await.is_err() {
-                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                log::warn!("fake {task_id}: receiver dropped, stopping");
                                 break;
                             }
                         }
                         Some(event) = inject_event_rx.recv() => {
                             if event_tx.send(event).await.is_err() {
-                                log::warn!("fake {}: receiver dropped, stopping", task_id);
+                                log::warn!("fake {task_id}: receiver dropped, stopping");
                                 break;
                             }
                         }
@@ -87,16 +88,16 @@ impl PlatformAdapter for FakePlatform {
                 captured_tx: self.captured_tx,
             };
 
-            let lister = FakeLister {
+            let lister = Arc::new(FakeLister {
                 channels: self.channels,
                 users: self.users,
-            };
+            });
 
             Ok(PlatformHandle {
                 id,
-                sender: Box::new(sender),
-                user_lister: Box::new(lister.clone()),
-                channel_lister: Box::new(lister),
+                sender: Arc::new(sender),
+                user_lister: Arc::clone(&lister) as Arc<dyn harmony_core::ListUsers>,
+                channel_lister: lister,
                 shutdown_tx,
             })
         })
@@ -104,15 +105,15 @@ impl PlatformAdapter for FakePlatform {
 }
 
 struct FakeSender {
-    captured_tx: mpsc::UnboundedSender<CoreMessage>,
+    captured_tx: mpsc::UnboundedSender<Arc<CoreMessage>>,
 }
 
 impl SendMessage for FakeSender {
     fn send_message<'a>(
         &'a self,
-        message: &'a CoreMessage,
+        message: &'a Arc<CoreMessage>,
     ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
-        let _ = self.captured_tx.send(message.clone());
+        let _ = self.captured_tx.send(Arc::clone(message));
         Box::pin(async { Ok(()) })
     }
 }
@@ -142,7 +143,7 @@ pub struct FakeControl {
     platform_id: PlatformId,
     inject_msg_tx: mpsc::Sender<PlatformMessage>,
     inject_event_tx: mpsc::Sender<MetaEvent>,
-    captured_rx: tokio::sync::Mutex<mpsc::UnboundedReceiver<CoreMessage>>,
+    captured_rx: tokio::sync::Mutex<mpsc::UnboundedReceiver<Arc<CoreMessage>>>,
 }
 
 impl FakeControl {
@@ -165,7 +166,7 @@ impl FakeControl {
     }
 
     /// Wait for the next relayed message, returning `None` on timeout.
-    pub async fn next_message(&self, timeout: Duration) -> Option<CoreMessage> {
+    pub async fn next_message(&self, timeout: Duration) -> Option<Arc<CoreMessage>> {
         let mut rx = self.captured_rx.lock().await;
         tokio::time::timeout(timeout, rx.recv())
             .await

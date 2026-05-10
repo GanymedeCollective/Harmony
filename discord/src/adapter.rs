@@ -1,12 +1,15 @@
 //! Starts a Serenity client, produces a `PlatformHandle`.
 
+use std::sync::Arc;
+
 use exn::{Exn, ResultExt as _};
 use harmony_core::{
     BoxFuture, HarmonyError, MetaEvent, PlatformAdapter, PlatformHandle, PlatformId,
-    PlatformMessage,
+    PlatformMessage, SendMessage,
 };
 use tokio::sync::{mpsc, oneshot};
 
+use crate::proxy::{DiscordSendProxy, SendRequest};
 use crate::sender::DiscordSender;
 
 pub struct DiscordAdapter {
@@ -54,8 +57,8 @@ impl PlatformAdapter for DiscordAdapter {
                 .await
                 .or_raise(|| HarmonyError::connection("discord client setup failed"))?;
 
-            let http = client.http.clone();
-            let shard_manager = client.shard_manager.clone();
+            let shard_manager = Arc::clone(&client.shard_manager);
+            let http = Arc::clone(&client.http);
             let sender = DiscordSender::new(http, platform_id.clone());
 
             let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
@@ -66,17 +69,32 @@ impl PlatformAdapter for DiscordAdapter {
                 }
             });
 
+            let lister = Arc::new(sender.clone());
+
             let sm = shard_manager;
+            let (send_tx, mut send_rx) = mpsc::channel(256);
             tokio::spawn(async move {
-                let _ = shutdown_rx.await;
-                sm.shutdown_all().await;
+                let mut shutdown = shutdown_rx;
+                loop {
+                    tokio::select! {
+                        req = send_rx.recv() => {
+                            let Some(req) : Option<SendRequest> = req else { break };
+                            let result = sender.send_message(&req.message).await;
+                            let _ = req.response_tx.send(result);
+                        }
+                        _ = &mut shutdown => {
+                            sm.shutdown_all().await;
+                            break;
+                        }
+                    }
+                }
             });
 
             Ok(PlatformHandle {
                 id: platform_id,
-                sender: Box::new(sender.clone()),
-                user_lister: Box::new(sender.clone()),
-                channel_lister: Box::new(sender),
+                sender: Arc::new(DiscordSendProxy { tx: send_tx }),
+                user_lister: Arc::clone(&lister) as Arc<dyn harmony_core::ListUsers>,
+                channel_lister: Arc::new(lister),
                 shutdown_tx,
             })
         })

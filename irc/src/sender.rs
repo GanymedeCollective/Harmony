@@ -1,6 +1,7 @@
 //! Sends bridged messages as IRC PRIVMSG.
 
 use std::fmt::Write as _;
+use std::sync::Arc;
 
 use exn::{Exn, OptionExt as _};
 use harmony_core::{
@@ -47,7 +48,7 @@ fn format_message_from_core(
 impl SendMessage for IrcSender {
     fn send_message<'a>(
         &'a self,
-        message: &'a CoreMessage,
+        message: &'a Arc<CoreMessage>,
     ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         Box::pin(async {
             let display_name = message

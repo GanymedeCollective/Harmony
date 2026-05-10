@@ -22,14 +22,14 @@ use crate::{
 pub(crate) struct CoreCtx {
     pub(crate) channels: Arc<RwLock<Peers<CoreChannel>>>,
     pub(crate) users: Arc<RwLock<Peers<CoreUser>>>,
-    pub(crate) senders: HashMap<PlatformId, Box<dyn SendMessage>>,
+    pub(crate) senders: HashMap<PlatformId, Arc<dyn SendMessage>>,
 }
 
 impl CoreCtx {
     pub(crate) fn new(
         channels: Arc<RwLock<Peers<CoreChannel>>>,
         users: Arc<RwLock<Peers<CoreUser>>>,
-        senders: HashMap<PlatformId, Box<dyn SendMessage>>,
+        senders: HashMap<PlatformId, Arc<dyn SendMessage>>,
     ) -> Self {
         Self {
             channels,
@@ -72,9 +72,9 @@ pub async fn run(
         mpsc::channel::<(PlatformId, PlatformMessage)>(DEFAULT_CHANNEL_BUFFER);
     let (event_tx, mut event_rx) = mpsc::channel::<MetaEvent>(DEFAULT_CHANNEL_BUFFER);
 
-    let mut senders: HashMap<PlatformId, Box<dyn SendMessage>> = HashMap::new();
-    let mut user_listers: HashMap<PlatformId, Box<dyn ListUsers>> = HashMap::new();
-    let mut channel_listers: HashMap<PlatformId, Box<dyn ListChannels>> = HashMap::new();
+    let mut senders: HashMap<PlatformId, Arc<dyn SendMessage>> = HashMap::new();
+    let mut user_listers: HashMap<PlatformId, Arc<dyn ListUsers>> = HashMap::new();
+    let mut channel_listers: HashMap<PlatformId, Arc<dyn ListChannels>> = HashMap::new();
     let mut shutdown_txs: Vec<(PlatformId, oneshot::Sender<()>)> = Vec::new();
 
     let start_futures: Vec<_> = adapters
@@ -105,7 +105,7 @@ pub async fn run(
     drop(msg_tx);
     drop(event_tx);
 
-    let (channels, users) = discover_and_build(&channel_listers, &user_listers).await;
+    let (channels, users) = discover_and_build(channel_listers, user_listers).await;
 
     log::info!(
         "Harmony ready: {} channel bridge(s), {} user group(s)",
@@ -189,11 +189,11 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
         resolve_or_register(&mut u, source_id, &msg.author)
     };
 
-    let core_msg = CoreMessage {
+    let core_msg = Arc::new(CoreMessage {
         author: core_author,
         channel: core_channel.clone(),
         content: platform_to_core_message(&ctx, source_id, msg.content).await,
-    };
+    });
 
     for platform in core_channel.alias.keys() {
         if platform == source_id {
@@ -224,8 +224,8 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
 
 /// Query all adapters for their channels/users, then build the collections.
 async fn discover_and_build(
-    channel_listers: &HashMap<PlatformId, Box<dyn ListChannels>>,
-    user_listers: &HashMap<PlatformId, Box<dyn ListUsers>>,
+    channel_listers: HashMap<PlatformId, Arc<dyn ListChannels>>,
+    user_listers: HashMap<PlatformId, Arc<dyn ListUsers>>,
 ) -> (Channels, Users) {
     let mut discovered_channels = Vec::new();
     for (pid, lister) in channel_listers {
