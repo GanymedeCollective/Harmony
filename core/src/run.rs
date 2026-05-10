@@ -189,11 +189,11 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
         resolve_or_register(&mut u, source_id, &msg.author)
     };
 
-    let core_msg = CoreMessage {
+    let core_msg = Arc::new(CoreMessage {
         author: core_author,
         channel: core_channel.clone(),
         content: platform_to_core_message(&ctx, source_id, msg.content).await,
-    };
+    });
 
     for platform in core_channel.alias.keys() {
         if platform == source_id {

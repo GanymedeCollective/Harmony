@@ -19,13 +19,13 @@ pub struct DiscordSendProxy {
 impl SendMessage for DiscordSendProxy {
     fn send_message<'a>(
         &'a self,
-        message: &'a CoreMessage,
+        message: &'a Arc<CoreMessage>,
     ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         Box::pin(async {
             let (response_tx, response_rx) = oneshot::channel();
             self.tx
                 .send(SendRequest {
-                    message: message.clone(),
+                    message: Arc::clone(message),
                     response_tx,
                 })
                 .await

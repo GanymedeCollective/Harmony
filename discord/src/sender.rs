@@ -103,7 +103,7 @@ fn format_message_from_core(platform_id: &PlatformId, message: &CoreMessage) -> 
 impl SendMessage for DiscordSender {
     fn send_message<'a>(
         &'a self,
-        message: &'a CoreMessage,
+        message: &'a Arc<CoreMessage>,
     ) -> BoxFuture<'a, Result<(), Exn<HarmonyError>>> {
         Box::pin(async move {
             let channel = message
