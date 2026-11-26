@@ -21,6 +21,8 @@ log.workspace = true
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync", "signal"] }
 toml.workspace = true
+tracing = { version = "0.1.44", features = ["log"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 [dev-dependencies]
 harmony-testing.workspace = true

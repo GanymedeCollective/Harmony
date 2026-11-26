@@ -13,6 +13,7 @@ exn.workspace = true
 log.workspace = true
 serenity.workspace = true
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync"] }
+tracing = "0.1.44"
 
 [lints]
 workspace = true

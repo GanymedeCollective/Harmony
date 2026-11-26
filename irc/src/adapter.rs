@@ -110,23 +110,23 @@ async fn discover_and_join(
     let mut nicknames: HashSet<String> = HashSet::new();
     let sentinel = "harmony-discovery";
 
-    log::info!("irc: waiting for registration...");
+    tracing::info!("irc: waiting for registration...");
 
     let result = tokio::time::timeout(DISCOVERY_TIMEOUT_S, async {
         while let Some(result) = stream.next().await {
             let msg = match result {
                 Ok(msg) => msg,
                 Err(e) => {
-                    log::error!("irc: stream error during discovery: {e}");
+                    tracing::error!("irc: stream error during discovery: {e}");
                     break;
                 }
             };
 
             match &msg.command {
                 Command::Response(Response::RPL_ENDOFMOTD | Response::ERR_NOMOTD, _) => {
-                    log::info!("irc: registered, discovering channels via LIST");
+                    tracing::info!("irc: registered, discovering channels via LIST");
                     if let Err(e) = raw.send(Command::LIST(None, None)) {
-                        log::error!("irc: failed to send LIST: {e}");
+                        tracing::error!("irc: failed to send LIST: {e}");
                         break;
                     }
                 }
@@ -140,14 +140,14 @@ async fn discover_and_join(
                     }
                 }
                 Command::Response(Response::RPL_LISTEND, _) => {
-                    log::info!("irc: found {} channel(s), joining all...", channels.len());
+                    tracing::info!("irc: found {} channel(s), joining all...", channels.len());
                     for ch in &channels {
                         if let Err(e) = raw.send(Command::JOIN(ch.name.clone(), None, None)) {
-                            log::error!("irc: failed to join {}: {e}", ch.name);
+                            tracing::error!("irc: failed to join {}: {e}", ch.name);
                         }
                     }
                     if let Err(e) = raw.send(Command::PING(sentinel.to_owned(), None)) {
-                        log::error!("irc: failed to send sentinel PING: {e}");
+                        tracing::error!("irc: failed to send sentinel PING: {e}");
                         break;
                     }
                 }
@@ -171,7 +171,7 @@ async fn discover_and_join(
     .await;
 
     if result.is_err() {
-        log::warn!(
+        tracing::warn!(
             "irc: discovery timed out after {}s",
             DISCOVERY_TIMEOUT_S.as_secs()
         );
@@ -188,7 +188,7 @@ async fn discover_and_join(
         .collect();
     users.sort_by(|a, b| a.id.cmp(&b.id));
 
-    log::info!(
+    tracing::info!(
         "irc: joined {} channel(s), found {} unique user(s)",
         channels.len(),
         users.len()
@@ -210,7 +210,7 @@ async fn process_stream(
         let msg = match result {
             Ok(msg) => msg,
             Err(e) => {
-                log::error!("irc: stream error: {e}");
+                tracing::error!("irc: stream error: {e}");
                 break;
             }
         };
@@ -224,7 +224,7 @@ async fn process_stream(
                     continue;
                 }
                 if msg_tx.send((pid.clone(), core_msg)).await.is_err() {
-                    log::warn!("irc: receiver dropped, stopping stream");
+                    tracing::warn!("irc: receiver dropped, stopping stream");
                     break;
                 }
             }
@@ -253,7 +253,7 @@ async fn process_stream(
                         .await
                         .is_err()
                 {
-                    log::warn!("irc: receiver dropped, stopping stream");
+                    tracing::warn!("irc: receiver dropped, stopping stream");
                     break;
                 }
             }
@@ -277,7 +277,7 @@ async fn process_stream(
                     .await
                     .is_err()
                 {
-                    log::warn!("irc: receiver dropped, stopping stream");
+                    tracing::warn!("irc: receiver dropped, stopping stream");
                     break;
                 }
             }
@@ -296,7 +296,7 @@ async fn process_stream(
                     .await
                     .is_err()
                 {
-                    log::warn!("irc: receiver dropped, stopping stream");
+                    tracing::warn!("irc: receiver dropped, stopping stream");
                     break;
                 }
             }
@@ -318,7 +318,7 @@ async fn process_stream(
                     .await
                     .is_err()
                 {
-                    log::warn!("irc: receiver dropped, stopping stream");
+                    tracing::warn!("irc: receiver dropped, stopping stream");
                     break;
                 }
             }

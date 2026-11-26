@@ -11,6 +11,7 @@ harmony-core.workspace = true
 exn.workspace = true
 log.workspace = true
 tokio = { workspace = true, features = ["sync", "rt", "time"] }
+tracing = "0.1.44"
 
 # Testing does not require the same level of clippy warnings
 [lints.clippy]
