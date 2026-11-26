@@ -62,7 +62,7 @@ impl PlatformAdapter for DiscordAdapter {
 
             tokio::spawn(async move {
                 if let Err(e) = client.start().await {
-                    log::error!("discord: client error: {e}");
+                    tracing::error!("discord: client error: {e}");
                 }
             });
 

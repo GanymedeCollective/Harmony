@@ -11,6 +11,7 @@ futures.workspace = true
 http.workspace = true
 log.workspace = true
 tokio = { workspace = true, features = ["sync", "rt", "macros"] }
+tracing = "0.1.44"
 
 [lints]
 workspace = true

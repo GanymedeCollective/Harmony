@@ -12,7 +12,7 @@ pub async fn fetch_guild_data(
         .get_guilds(None, Some(100))
         .await
         .or_raise(|| HarmonyError::discovery("discord guild discovery failed"))?;
-    log::info!("discord: found {} guild(s)", guilds.len());
+    tracing::info!("discord: found {} guild(s)", guilds.len());
 
     let mut channels = Vec::new();
     let mut users = Vec::new();
@@ -20,7 +20,7 @@ pub async fn fetch_guild_data(
 
     for guild_info in &guilds {
         let guild_id = guild_info.id;
-        log::debug!(
+        tracing::debug!(
             "discord: fetching data for guild \"{}\" ({})",
             guild_info.name,
             guild_id
@@ -72,7 +72,7 @@ pub async fn fetch_guild_data(
         }
     }
 
-    log::info!(
+    tracing::info!(
         "discord: fetched {} channel(s) and {} user(s)",
         channels.len(),
         users.len()

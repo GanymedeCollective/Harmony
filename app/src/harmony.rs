@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         .config
         .unwrap_or_else(|| runtime_dir.join("config.toml"));
 
-    log::info!("config: {}", config_path.display());
+    tracing::debug!("config: {}", config_path.display());
 
     let cfg = config::load(&config_path)?;
     let adapters = create_adapters(&cfg);
@@ -46,14 +46,14 @@ async fn main() -> Result<()> {
         .await
         .map_err(|e| anyhow::anyhow!("{e}"))?;
 
-    log::info!("Harmony is running, ctrl+c to stop");
+    tracing::info!("Harmony is running, ctrl+c to stop");
     tokio::signal::ctrl_c().await?;
 
-    log::info!("shutting down... (press ctrl+c again to force)");
+    tracing::info!("shutting down... (press ctrl+c again to force)");
     tokio::select! {
         () = handle.shutdown() => {}
         _ = tokio::signal::ctrl_c() => {
-            log::warn!("forced shutdown");
+            tracing::warn!("forced shutdown");
             std::process::exit(1);
         }
     }

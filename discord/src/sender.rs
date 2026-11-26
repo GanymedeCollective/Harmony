@@ -46,10 +46,10 @@ impl DiscordSender {
             .into_iter()
             .find(|w| w.name.as_deref() == Some(WEBHOOK_NAME))
         {
-            log::trace!("discord: reusing existing webhook in channel {channel_id}");
+            tracing::trace!("discord: reusing existing webhook in channel {channel_id}");
             Ok(wh)
         } else {
-            log::debug!("discord: creating webhook in channel {channel_id}");
+            tracing::debug!("discord: creating webhook in channel {channel_id}");
             Ok(cid
                 .create_webhook(http, CreateWebhook::new(WEBHOOK_NAME))
                 .await

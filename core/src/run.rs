@@ -47,13 +47,13 @@ pub struct AdapterHandle {
 impl AdapterHandle {
     pub async fn shutdown(self) {
         for (name, tx) in self.shutdown_txs {
-            log::info!("stopping {name}...");
+            tracing::info!("stopping {name}...");
             if tx.send(()).is_err() {
-                log::error!("Failed to send shutdown signal for {name}");
+                tracing::error!("Failed to send shutdown signal for {name}");
             }
         }
         if let Err(e) = self.task.await {
-            log::error!("JoinHandle failed with: {e}");
+            tracing::error!("JoinHandle failed with: {e}");
         }
     }
 }
@@ -87,7 +87,7 @@ pub async fn run(
                 let handle = adapter.start(tx, etx).await.or_raise(|| {
                     HarmonyError::connection(format!("failed to start platform {name}"))
                 })?;
-                log::info!("started platform: {}", handle.id);
+                tracing::info!("started platform: {}", handle.id);
                 Ok::<_, Exn<HarmonyError>>(handle)
             }
         })
@@ -107,7 +107,7 @@ pub async fn run(
 
     let (channels, users) = discover_and_build(&channel_listers, &user_listers).await;
 
-    log::info!(
+    tracing::info!(
         "Harmony ready: {} channel bridge(s), {} user group(s)",
         channels.len(),
         users.len(),
@@ -149,7 +149,7 @@ async fn platform_to_core_segment(
 
             mentioned_user.map_or_else(
                 || {
-                    log::warn!("unresolved mention '{id}' on {source_id} -> falling back to text");
+                    tracing::warn!("unresolved mention '{id}' on {source_id} -> falling back to text");
                     CoreMessageSegment::Text(format!("@{id}"))
                 },
                 CoreMessageSegment::Mention,
@@ -180,7 +180,7 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
     };
 
     let Some(core_channel) = core_channel else {
-        log::debug!("{source_id}: no route for channel {}", msg.channel.id);
+        tracing::debug!("{source_id}: no route for channel {}", msg.channel.id);
         return;
     };
 
@@ -208,13 +208,13 @@ async fn dispatch(ctx: Arc<CoreCtx>, source_id: &PlatformId, msg: PlatformMessag
                 Ok(()) => break,
                 Err(e) if e.is_temporary() && attempts < MAX_SEND_RETRIES => {
                     attempts += 1;
-                    log::warn!(
+                    tracing::warn!(
                         "{source_id} -> {platform}: relay failed (attempt {attempts}/{MAX_SEND_RETRIES}): {e}"
                     );
                     tokio::time::sleep(RETRY_BACKOFF * attempts).await;
                 }
                 Err(e) => {
-                    log::error!("{source_id} -> {platform}: relay failed (giving up): {e}");
+                    tracing::error!("{source_id} -> {platform}: relay failed (giving up): {e}");
                     break;
                 }
             }
@@ -231,10 +231,10 @@ async fn discover_and_build(
     for (pid, lister) in channel_listers {
         match lister.list_channels().await {
             Ok(chs) => {
-                log::info!("{pid}: discovered {} channel(s)", chs.len());
+                tracing::info!("{pid}: discovered {} channel(s)", chs.len());
                 discovered_channels.push((pid.clone(), chs));
             }
-            Err(e) => log::error!("{pid}: failed to list channels: {e}"),
+            Err(e) => tracing::error!("{pid}: failed to list channels: {e}"),
         }
     }
 
@@ -242,10 +242,10 @@ async fn discover_and_build(
     for (pid, lister) in user_listers {
         match lister.list_users().await {
             Ok(us) => {
-                log::info!("{pid}: discovered {} user(s)", us.len());
+                tracing::info!("{pid}: discovered {} user(s)", us.len());
                 discovered_users.push((pid.clone(), us));
             }
-            Err(e) => log::error!("{pid}: failed to list users: {e}"),
+            Err(e) => tracing::error!("{pid}: failed to list users: {e}"),
         }
     }
 

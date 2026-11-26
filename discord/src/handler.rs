@@ -19,7 +19,7 @@ pub struct Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, _ctx: Context, ready: Ready) {
-        log::info!("discord: connected as {}", ready.user.name);
+        tracing::info!("discord: connected as {}", ready.user.name);
         let _ = self.bot_user_id.set(ready.user.id.get());
     }
 
@@ -39,7 +39,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -65,7 +65,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -88,7 +88,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -120,7 +120,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -141,7 +141,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -163,7 +163,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 
@@ -184,7 +184,7 @@ impl EventHandler for Handler {
             .await
             .is_err()
         {
-            log::warn!("discord: receiver dropped, handler will stop forwarding");
+            tracing::warn!("discord: receiver dropped, handler will stop forwarding");
         }
     }
 }
